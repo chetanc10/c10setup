@@ -1,0 +1,7 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =5
+let g:netrw_dirhist_1='/home/chetan/ChetaN/bgyu_ihgw/bgyu_ihgw/trunk/ZAP'
+let g:netrw_dirhist_2='/home/chetan/ChetaN/bgyu_ihgw/bgyu_ihgw/trunk/ZNP'
+let g:netrw_dirhist_3='/home/chetan/ChetaN/JunK/bgyuJunK/sepCmds/ZAP'
+let g:netrw_dirhist_4='/home/chetan/ChetaN/bgyu_ihgw/bgyu_ihgw/trunk/ZNP'
+let g:netrw_dirhist_5='/home/chetan/ChetaN/bgyu_ihgw/bgyu_ihgw/trunk/ZAP'

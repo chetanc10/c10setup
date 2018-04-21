@@ -1,0 +1,40 @@
+# !/bin/bash
+
+## my bash setup/definitions ##
+# Just to make it easier to use terminal command line 
+# for helping make developer environment effective the following's done!
+
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+
+# Improve history file storage capability
+unset HISTSIZE
+unset HISTFILESIZE
+HISTSIZE=5000
+HISTFILESIZE=10000
+
+# subversion editor setting
+export SVN_EDITOR=vim
+
+# bash default editor setting
+export EDITOR=vim
+
+# key-map to invoke "vim ."
+bind -x '"\C-o":"vim ."'
+
+# Simplify normal user prompt string
+PROMPT_COMMAND='echo -ne "\033]0;${PWD}\007"'
+PS1='${debian_chroot:+($debian_chroot)}\$ '
+
+##### Now the bash aliases #####
+
+# source code browsing #
+alias detag='rm -rf cscope.out; rm -rf tags'
+alias retag='cscope -Rb && ctags -R'
+
+# Git specific - Oh we use them alot! #
+alias gitst='git status'
+alias gitm='git checkout master'
+alias gitc='git checkout'
+alias gitp='git pull'
+
+# Miscellaneous regulars #
