@@ -165,6 +165,7 @@ install_c10sh () {
 	do
 		filename=$(basename $file)
 		[ "$filename" == "c10setup.sh" ] && continue;
+		[ "$filename" == "README.md" ] && continue;
 		echo -ne "\n\n****Install '$filename'?(y|n): "
 		read answer
 		[[ "$answer" == "n" ]] && continue
