@@ -167,8 +167,7 @@ declare -a c10utils=(vim cscope exuberant-ctags curl git at tree ifstat dconf-ed
 cnt_c10utils=${#c10utils[@]}
 
 list_c10utils () {
-	for i in "${!c10utils[@]}"
-	do 
+	for i in "${!c10utils[@]}"; do 
 		local iter=$((i+1))
 		printf '%2d) %-24s' "$i" "${c10utils[i]}"
 		[ $iter -ne 0 ] && [ $(($iter%3)) -eq 0 ] && echo ""
@@ -210,8 +209,7 @@ _install_c10util () {
 }
 
 install_c10utils () {
-	for i in "${c10utils[@]}"
-	do
+	for i in "${c10utils[@]}"; do
 		echo -ne "\n\n****Install '$i'?(y|n): "
 		read answer
 		[ "$answer" == "y" ] && _install_c10util "$i"
@@ -224,8 +222,7 @@ declare -a c10libs=(libpcap-dev libncurses5-dev libelf-dev libssl-dev ffmpeg lib
 cnt_c10libs=${#c10libs[@]}
 
 list_c10libs () {
-	for i in "${!c10libs[@]}"
-	do 
+	for i in "${!c10libs[@]}"; do 
 		local iter=$((i+1))
 		printf '%2d) %-24s' "$i" "${c10libs[i]}"
 		[ $iter -ne 0 ] && [ $(($iter%3)) -eq 0 ] && echo ""
@@ -239,8 +236,7 @@ _install_c10lib () {
 }
 
 install_c10libs () {
-	for i in "${c10libs[@]}"
-	do
+	for i in "${c10libs[@]}"; do
 		echo -ne "\n\n****Install '$i'?(y|n): "
 		read answer
 		[ "$answer" == "y" ] && _install_c10lib "$i"
@@ -248,22 +244,45 @@ install_c10libs () {
 	done
 }
 
+declare -a c10scripts=()
+cnt_c10scripts=0
+_build_c10scripts () {
+	local filename
+	for file in "$dir_c10setup"/*.*; do
+		filename=$(basename $file)
+		[ "$filename" == "README.md" ] && continue;
+		[ "$filename" == "c10setup.sh" ] && continue;
+		c10scripts+=("$filename")
+	done
+	cnt_c10scripts=${#c10scripts[@]}
+}
+
+list_c10scripts () {
+	_build_c10scripts
+	for i in "${!c10scripts[@]}"; do 
+		local iter=$((i+1))
+		printf '%2d) %-24s' "$i" "${c10scripts[i]}"
+		[ $iter -ne 0 ] && [ $(($iter%3)) -eq 0 ] && echo ""
+	done
+}
+
+_install_c10script () {
+	sudo rm -f /usr/bin/$1
+	sudo ln -s "$file" /usr/bin/$1
+	_notify_when_done $? "Install $1"
+}
+
 install_c10scripts () {
 	echo "I'll just setup a soft link for all the requested scripts. So you MUST keep this folder in this directory or move it somewhere else and invoke from that directory"
 	echo "Everytime you move this directory, you'll need to run c10setup.sh from the new path so that the soft-links are not broken.. I warned ya!"
 	local filename
-	for file in "$dir_c10setup"/*.*
-	do
+	for file in "$dir_c10setup"/*.*; do
 		filename=$(basename $file)
 		[ "$filename" == "README.md" ] && continue;
 		[ "$filename" == "c10setup.sh" ] && echo "I'll not setup soft-link for c10setup.sh as it may break if this folder moves and you shouldn't be relying only on c10setup softlink" && continue;
 		echo -ne "\n\n****Install '$filename'?(y|n): "
 		read answer
-		if [ "$answer" == "y" ]; then 
-			sudo rm -rf /bin/$filename
-			sudo ln -s "$file" /bin/$filename
-			_notify_when_done $? "Install $i"
-		fi
+		[ "$answer" == "y" ] && _install_c10script "$filename"
 		exit_if_requested $answer
 	done
 }
@@ -272,8 +291,7 @@ declare -a c10rems=(rhythmbox brasero shotwell empathy totem)
 cnt_c10rems=${#c10rems[@]}
 
 list_c10rems () {
-	for i in "${!c10rems[@]}"
-	do 
+	for i in "${!c10rems[@]}"; do 
 		local iter=$((i+1))
 		printf '%2d) %-24s' "$i" "${c10rems[i]}"
 		[ $iter -ne 0 ] && [ $(($iter%3)) -eq 0 ] && echo ""
@@ -286,8 +304,7 @@ _uninstall_c10rem () {
 }
 
 uninstall_c10rems () {
-	for i in "${c10rems[@]}"
-	do
+	for i in "${c10rems[@]}"; do
 		echo -ne "\n\n****Remove '$i'?(y|n): "
 		read answer
 		[ "$answer" == "y" ] && _uninstall_c10rem "$i"
@@ -362,7 +379,12 @@ if [ ! -z "$2" ] && [ "$2" == "-s" ] ; then
 			_uninstall_c10rem ${c10rems[$idx]}
 			;;
 		"script")
-			echo -ne "TODO.. Sorry"
+			list_c10scripts
+			last_idx=$(($cnt_c10scripts-1))
+			echo -ne "\n\nSelect a script by it's index (0-$last_idx): "
+			read idx
+			_validate_idx $idx 0 $last_idx
+			_install_c10script ${c10scripts[$idx]}
 			;;
 		*)
 			echo -e "\nError: Invalid setup_choice: $3" && _print_usage
