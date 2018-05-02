@@ -39,7 +39,7 @@ _install_skype () {
 	if [ ! -f "$fpath" ]; then
 		[ "$fpath" != "n" ] && echo "!!!!!!!!!!!!!!!Invalid filepath: $fpath.. I'm taking over now"
 		echo "Downloading latest skypeforlinux debian file into /tmp/"
-		wget https://repo.skype.com/latest/skypeforlinux-64.deb /tmp/
+		wget https://repo.skype.com/latest/skypeforlinux-64.deb -O /tmp/skypeforlinux-64.deb
 		[ "$?" != "0" ] && rm -rf /tmp/skypeforlinux-64.deb && _notify_when_done 1 "Install skype" "wget https://repo.skype.com/latest/skypeforlinux-64.deb failed" && return
 		skype_deb_path=/tmp/skypeforlinux-64.deb
 	else
@@ -53,7 +53,7 @@ _install_skype () {
 		return
 	fi
 	sudo apt install -f
-	_notify_when_done 1 "Install skype" "Installed skypeforlinux. Move (or Remove) $fpath as you need and then click on OK here.."
+	_notify_when_done $? "Install skype" "Installed skypeforlinux. Move (or Remove) $fpath as you need and then click on OK here.."
 }
 
 _install_youtube_dl () {
