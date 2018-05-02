@@ -1,7 +1,26 @@
 #!/bin/bash
 
-echo "Hello! I'm an Interactive Installer Program for basic system utilities and libraries. Enter 'x' during any stage of questioning from me to kill me"
-echo "Entering 'n' or just pressing <ENTER> will be considered as choice for 'NO' ;-)"
+_print_usage () {
+	echo -e "\nI'm an Interactive Installer Program for basic system utilities and libraries. Enter 'x' during any stage of questioning from me to kill me. I'll notify in visual and audible manner about completion of selected setup.
+Entering 'n' or just pressing <ENTER> will be considered as choice for 'NO'.
+
+Usage: ./c10setup.sh <alert_type> [setup_type <setup_choice>]
+
+alert_type:
+	-z to use 'zenity' (GUI visual notification)
+	-e to use 'echo' (Console visual notification)
+
+setup_type: Optional. Defaults to full c10setup asking for all libs/utils/scripts/rems.
+	-f for full c10setup asking for all full-apt-get-update/must-have-packages/libs/utils/scripts/etc
+	-s for selecting specific group - libs/utils/scripts/rems.
+		setup_choice is must and is one of following: 
+			lib 	select libraries group
+			util 	select utilities group
+			script  select scripts group
+			rem     select removables group (removes targets)"
+
+	exit 0
+}
 
 invoked=$0
 
@@ -11,13 +30,13 @@ dir_c10setup=`dirname $invoked`
 sound_success=/usr/share/sounds/freedesktop/stereo/complete.oga
 sound_failure=/usr/share/sounds/freedesktop/stereo/suspend-error.oga
 
-alert_sel="z"
+alert_type="z"
 
 __alert_func () {
-	if [ "$alert_sel" == "z" ]; then
+	if [ "$alert_type" == "z" ]; then
 		zenity --info --text="$1" 2>/dev/null
 	else # no zenity, just echo on terminal
-		echo "$1"
+		echo -e "$1"
 	fi
 }
 
@@ -28,7 +47,11 @@ _notify_when_done () {
 		__alert_func "$2: SUCCESS"
 	else # Failure case
 		[ -e $sound_failure ] && paplay $sound_failure &
-		__alert_func "$2: FAILURE\nReason: $3"
+		if [ -z "$3" ]; then
+			__alert_func "$2: FAILURE"
+		else
+			__alert_func "$2: FAILURE\nReason: $3"
+		fi
 	fi
 }
 
@@ -140,62 +163,87 @@ _install_arc_dark () {
 	_notify_when_done $? "Install dark-theme"
 }
 
-declare -a cutils=(vim cscope exuberant-ctags curl git at tree ifstat dconf-editor unity-tweak-tool valgrind minicom tftp-server lftp subversion meld ssh rar unrar openvpn vlc tomboy nmap artha skype youtube-dl gparted synaptic wifi-radar wireshark qemu unity-dark-theme)
+declare -a c10utils=(vim cscope exuberant-ctags curl git at tree ifstat dconf-editor unity-tweak-tool valgrind minicom tftp-server lftp subversion meld ssh rar unrar openvpn vlc tomboy nmap artha skype youtube-dl gparted synaptic wifi-radar wireshark qemu unity-dark-theme)
+cnt_c10utils=${#c10utils[@]}
 
-install_cutils () {
-	for i in "${cutils[@]}"
+list_c10utils () {
+	for i in "${!c10utils[@]}"
+	do 
+		local iter=$((i+1))
+		printf '%2d) %-24s' "$i" "${c10utils[i]}"
+		[ $iter -ne 0 ] && [ $(($iter%3)) -eq 0 ] && echo ""
+	done
+}
+
+# This handles normal installables and also special utilities/apps which are not simple/proper apt-get installables
+_install_c10util () {
+	local do_aptget_install=0
+	case "$1" in
+		"skype")
+			_install_skype
+			;;
+		"youtube-dl")
+			_install_youtube_dl
+			;;
+		"qemu")
+			_install_qemu
+			;;
+		"tftp-server")
+			_install_tftp_server
+			;;
+		"vim")
+			_install_vim
+			do_aptget_install=1
+			;;
+		"unity-dark-theme")
+			_install_arc_dark
+			;;
+		*)
+			do_aptget_install=1
+			;;
+	esac
+	if [ $do_aptget_install -eq 1 ]; then
+		echo -e "Installing $1"
+		sudo apt-get install $1
+		_notify_when_done $? "Install $1"
+	fi
+}
+
+install_c10utils () {
+	for i in "${c10utils[@]}"
 	do
 		echo -ne "\n\n****Install '$i'?(y|n): "
 		read answer
-		if [ "$answer" == "y" ]; then
-			# This case block handles normal installables and also special utilities/apps which are not simple/proper apt-get installables
-			do_aptget_install=0
-			case "$i" in
-				"skype")
-					_install_skype
-					;;
-				"youtube-dl")
-					_install_youtube_dl
-					;;
-				"qemu")
-					_install_qemu
-					;;
-				"tftp-server")
-					_install_tftp_server
-					;;
-				"vim")
-					_install_vim
-					do_aptget_install=1
-					;;
-				"unity-dark-theme")
-					_install_arc_dark
-					;;
-				*)
-					do_aptget_install=1
-					;;
-			esac
-			if [ $do_aptget_install -eq 1 ]; then
-				echo -e "Installing $i"
-				sudo apt-get install $i
-				_notify_when_done $? "Install $i"
-			fi
-		fi
+		[ "$answer" == "y" ] && _install_c10util "$i"
+		# We don't test for exit choice before "y" as that's mostly unlikely choice
 		exit_if_requested $answer
 	done
 }
 
-declare -a clibs=(libpcap-dev libncurses5-dev libelf-dev libssl-dev ffmpeg libav-tools x264 x265)
+declare -a c10libs=(libpcap-dev libncurses5-dev libelf-dev libssl-dev ffmpeg libav-tools x264 x265)
+cnt_c10libs=${#c10libs[@]}
 
-install_clibs () {
-	for i in "${clibs[@]}"
+list_c10libs () {
+	for i in "${!c10libs[@]}"
+	do 
+		local iter=$((i+1))
+		printf '%2d) %-24s' "$i" "${c10libs[i]}"
+		[ $iter -ne 0 ] && [ $(($iter%3)) -eq 0 ] && echo ""
+	done
+}
+
+_install_c10lib () {
+	echo -e "Installing $1"
+	sudo apt-get install $1
+	_notify_when_done $? "Install $1"
+}
+
+install_c10libs () {
+	for i in "${c10libs[@]}"
 	do
 		echo -ne "\n\n****Install '$i'?(y|n): "
 		read answer
-		if [ "$answer" == "y" ]; then
-			echo -e "Installing $i"
-			sudo apt-get install $i
-			_notify_when_done $? "Install $i"
-		fi
+		[ "$answer" == "y" ] && _install_c10lib "$i"
 		exit_if_requested $answer
 	done
 }
@@ -212,6 +260,7 @@ install_c10scripts () {
 		echo -ne "\n\n****Install '$filename'?(y|n): "
 		read answer
 		if [ "$answer" == "y" ]; then 
+			sudo rm -rf /bin/$filename
 			sudo ln -s "$file" /bin/$filename
 			_notify_when_done $? "Install $i"
 		fi
@@ -219,17 +268,29 @@ install_c10scripts () {
 	done
 }
 
-declare -a crems=(rhythmbox brasero shotwell empathy totem)
+declare -a c10rems=(rhythmbox brasero shotwell empathy totem)
+cnt_c10rems=${#c10rems[@]}
 
-install_crems () {
-	for i in "${crems[@]}"
+list_c10rems () {
+	for i in "${!c10rems[@]}"
+	do 
+		local iter=$((i+1))
+		printf '%2d) %-24s' "$i" "${c10rems[i]}"
+		[ $iter -ne 0 ] && [ $(($iter%3)) -eq 0 ] && echo ""
+	done
+}
+
+_uninstall_c10rem () {
+	sudo apt-get remove --purge $1
+	_notify_when_done $? "Uninstall $1"
+}
+
+uninstall_c10rems () {
+	for i in "${c10rems[@]}"
 	do
 		echo -ne "\n\n****Remove '$i'?(y|n): "
 		read answer
-		if [ "$answer" == "y" ]; then
-			sudo apt-get remove --purge $i
-			_notify_when_done $? "Uninstall $i"
-		fi
+		[ "$answer" == "y" ] && _uninstall_c10rem "$i"
 		exit_if_requested $answer
 	done
 }
@@ -249,11 +310,72 @@ exit_if_requested () {
 	[[ "$1" == "x" ]] && echo -e "\nExiting c10setup...\n" && exit 0
 }
 
-echo "First decide if you want GUI alerts on utility/lib/etc setup completion or just echo on terminal"
-echo -ne "zenity or echo? (z/e): "
-read alert_sel
-echo "alert_sel: $alert_sel"
-[ "$alert_sel" != "z" ] && [ "$alert_sel" != "e" ] && echo "Go learn some ABCs.. See ya later!" && exit 0
+## Validate arguments ##
+
+argCount="$#"
+[ $argCount -lt 1 ] && echo -e "\nError: Invalid argument count" && _print_usage
+
+# Validate alert_type
+case "$1" in
+	"-z" | "-e")
+		alert_type=$1
+		;;
+	*)
+		echo -e "\nError: Invalid argument for alert_type: $1"
+		_print_usage
+		;;
+esac
+
+## Check if setup_type is selective or full setup and act accordingly ##
+
+#Usage: _validate_idx <idx_value> <first_idx_allowed> <last_idx_allowed>
+_validate_idx () {
+	[[ ( $1 -lt $2 ) || ( $1 -gt $3) ]] && echo "Invalid index: $1" && exit -1
+}
+
+# Validate and act on selective setup
+if [ ! -z "$2" ] && [ "$2" == "-s" ] ; then
+	[ $argCount -ne 3 ] && echo -e "\nError: No setup_choice provided for selective setup!" && _print_usage
+	case "$3" in
+		"lib")
+			list_c10libs
+			last_idx=$(($cnt_c10libs-1))
+			echo -ne "\n\nSelect a library by it's index (0-$last_idx): "
+			read idx
+			_validate_idx $idx 0 $last_idx
+			_install_c10lib ${c10libs[$idx]}
+			;;
+		"util")
+			list_c10utils
+			last_idx=$(($cnt_c10utils-1))
+			echo -ne "\n\nSelect a utility by it's index (0-$last_idx): "
+			read idx
+			_validate_idx $idx 0 $last_idx
+			_install_c10util ${c10utils[$idx]}
+			;;
+		"rem")
+			list_c10rems
+			last_idx=$(($cnt_c10rems-1))
+			echo -ne "\n\nSelect a remity by it's index (0-$last_idx): "
+			read idx
+			_validate_idx $idx 0 $last_idx
+			_uninstall_c10rem ${c10rems[$idx]}
+			;;
+		"script")
+			echo -ne "TODO.. Sorry"
+			;;
+		*)
+			echo -e "\nError: Invalid setup_choice: $3" && _print_usage
+			;;
+	esac
+	echo -e "\nTata!\n"
+	exit 0
+fi
+
+# Just confirm if it is full setup
+[ ! -z "$2" ] && [ "$2" != "-f" ] && echo -e "\nError: Invalid setup_type: $2" && _print_usage
+
+#_notify_when_done 0 "sample test" "damned"; exit 0
 
 echo -ne "\nTrying to install normal updates/dependencies. Shall I proceed?(y|n): "
 read answer
@@ -274,12 +396,12 @@ exit_if_requested $answer
 
 echo -ne "\nDo you need utility Installations? (y|n): "
 read answer
-[[ "$answer" == "y" ]] && install_cutils
+[[ "$answer" == "y" ]] && install_c10utils
 exit_if_requested $answer
 
 echo -ne "\nProceed to lib Installations? (y|n): "
 read answer
-[[ "$answer" == "y" ]] && install_clibs
+[[ "$answer" == "y" ]] && install_c10libs
 exit_if_requested $answer
 
 echo -ne "\nProceed to add c10 scripts to filesystem? (y|n): "
@@ -290,7 +412,7 @@ exit_if_requested $answer
 echo -e "\n***************************BEWARE***************************\nDURING UNINSTALLATIONS, PLEASE BE VERY CAREFUL AND OBSERVE WHICH PACKAGES ARE ADDITIONALLY REMOVED ALONG WITH REQUESTED UNINSTALLATION AND DECIDE IF YOU WANT TO PROCEED! OTHERWISE, KEEP AWAY!"
 echo -ne "Proceed to UNInstallations? (y|n): "
 read answer
-[[ "$answer" == "y" ]] && install_crems
+[[ "$answer" == "y" ]] && uninstall_c10rems
 exit_if_requested $answer
 
 echo -ne "\nSetup c10bash? (y/n): "
@@ -298,4 +420,4 @@ read answer
 [[ "$answer" == "y" ]] && setup_c10bash
 exit_if_requested $answer
 
-echo -e "\nTata..!\n"
+echo -e "\nTata!\n"
