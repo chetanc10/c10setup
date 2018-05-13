@@ -287,7 +287,7 @@ install_c10scripts () {
 	done
 }
 
-declare -a c10rems=(rhythmbox brasero shotwell empathy totem)
+declare -a c10rems=(rhythmbox brasero shotwell empathy totem thunderbird* deja-dup*)
 cnt_c10rems=${#c10rems[@]}
 
 list_c10rems () {
