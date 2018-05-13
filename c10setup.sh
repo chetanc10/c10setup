@@ -407,11 +407,11 @@ if [ "$answer" == "y" ]; then
 fi
 exit_if_requested $answer
 
-echo -ne "\nTrying to install basic important libs, manpages, etc. Shall I proceed?(y|n): "
+echo -ne "\nTrying to install basic important libs, dependencies, manpages, etc. Shall I proceed?(y|n): "
 read answer
 # Revisit if we find that the following's going to become a list of libs/stuffs/etc
 if [ "$answer" == "y" ]; then
-	sudo apt-get install manpages-posix-dev
+	sudo apt-get install manpages-posix-dev exfat-fuse exfat-utils
 	_notify_when_done 1 "Install manpages-posix-dev"
 fi
 exit_if_requested $answer
