@@ -36,5 +36,6 @@ alias gitst='git status'
 alias gitm='git checkout master'
 alias gitc='git checkout'
 alias gitp='git pull'
+alias gitd='git diff'
 
 # Miscellaneous regulars #
