@@ -39,6 +39,7 @@ fi
 terminated=$?
 if [ "$terminated" == "$FALSE" ]; then
 	echo -n "Shall I proceed to wait? [y|n]: "
+	began_at=`date +%s`
 	read yes
 	if [ "$yes" != "y" ]; then
 		exit 0
@@ -53,8 +54,10 @@ if [ "$terminated" == "$FALSE" ]; then
 		fi
 		sleep 1
 	done
+	lapse=$((`date +%s` - $began_at))
+	echo $lapse
 	#notify-send "process from $name completed"
-	zenity --info --text "process from $name completed!" &
+	zenity --info --text "process from $name completed.\nLapse: $lapse" 2>/dev/null &
 	paplay /usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg &
 else
 	echo "$name: Process not found!"
