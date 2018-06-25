@@ -25,6 +25,14 @@ bind -x '"\C-o":"vim ."'
 PROMPT_COMMAND='echo -ne "\033]0;${PWD}\007"'
 PS1='${debian_chroot:+($debian_chroot)}\$ '
 
+# function to set terminal title
+function c10t() {
+	[[ -z "$1" ]] && return
+	[[ -z "$ORIG" ]] && ORIG="$PS1"
+	TITLE="\[\e]2;$*\a\]"
+	PS1="${ORIG}${TITLE}"
+}
+
 ##### Now the bash aliases #####
 
 # source code browsing #
