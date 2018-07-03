@@ -107,6 +107,9 @@ function! LimiteToggle()
     endif
 endfunction
 
+" toggle cursorline
+nnoremap <leader>h :set cursorline!<CR>
+
 " select qscope modes i.e. have cscope output in cwindow or as normal output
 " inside vim
 " nnoremap <c-q><c-Up> :call Qscope(1)<cr>
