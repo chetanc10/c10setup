@@ -112,18 +112,19 @@ nnoremap <leader>h :set cursorline!<CR>
 
 " select qscope modes i.e. have cscope output in cwindow or as normal output
 " inside vim
-" nnoremap <c-q><c-Up> :call Qscope(1)<cr>
-" nnoremap <c-q><c-Down> :call Qscope(0)<cr>
-" let a:qScopeNeeded=0
-" function! Qscope(qScopeNeeded)
-"     if a:qScopeNeeded == 1
-" 		echom "qScope On"
-" 		set cscopequickfix=s-,c-,d-,i-,t-,e-
-"     else
-" 		echom "qScope Off"
-" 		set cscopequickfix=s0,c0,d0,i0,t0,e0
-"     endif
-" endfunction
+nnoremap <leader>q :call Qscope()<cr>
+let g:qScopeNeeded=0
+function! Qscope()
+	if g:qScopeNeeded == 1
+		set cscopequickfix=s-,c-,d-,i-,t-,e-
+		copen
+		let g:qScopeNeeded=0
+	else
+		set cscopequickfix=s0,c0,d0,i0,t0,e0
+		cclose
+		let g:qScopeNeeded=1
+	endif
+endfunction
 
 " comment selected lines in visual mode
 " vmap <C-K> <S-i>//<Esc>
@@ -147,10 +148,4 @@ endif
 execute pathogen#infect()
 syntax on
 filetype indent on
-
-" For temporary remote systems/servers where we can't do a c10setup for vim
-" environment
-" if !filereadable("~/.vim/plugin/cscope_maps.vim")
-" source ~/c10cscope_maps.vim
-" endif
 
