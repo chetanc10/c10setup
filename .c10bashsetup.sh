@@ -23,7 +23,7 @@ bind -x '"\C-o":"vim ."'
 
 # Simplify normal user prompt string
 PROMPT_COMMAND='echo -ne "\033]0;${PWD}\007"'
-PS1='${debian_chroot:+($debian_chroot)}\$ '
+PS1='${debian_chroot:+($debian_chroot)}\W\$ '
 
 # function to set terminal title
 function c10t() {
