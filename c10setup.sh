@@ -268,6 +268,7 @@ _build_c10scripts () {
 		filename=$(basename $file)
 		[ "$filename" == "README.md" ] && continue;
 		[ "$filename" == "c10setup.sh" ] && continue;
+		[ "$filename" == "wip" ] && continue; # Work In Progress!
 		c10scripts+=("$filename")
 	done
 	cnt_c10scripts=${#c10scripts[@]}
