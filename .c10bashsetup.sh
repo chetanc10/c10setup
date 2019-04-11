@@ -46,6 +46,7 @@ alias gitc='git checkout'
 alias gitp='git pull'
 alias gitd='git diff'
 alias gitl='git log'
+alias gitb='git branch'
 
 # Miscellaneous regulars #
 
