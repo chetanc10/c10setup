@@ -163,7 +163,7 @@ _install_arc_dark () {
 	_notify_when_done $? "Install dark-theme"
 }
 
-declare -a c10utils=(vim cscope exuberant-ctags curl git at tree ifstat dconf-editor unity-tweak-tool valgrind minicom tftp-server lftp subversion meld ssh rar unrar openvpn vlc tomboy nmap artha skype youtube-dl gparted synaptic wifi-radar wireshark qemu unity-dark-theme)
+declare -a c10utils=(vim cscope exuberant-ctags curl git at tree ifstat dconf-editor unity-tweak-tool valgrind minicom tftp-server lftp subversion meld ssh rar unrar openvpn vlc tomboy nmap artha skype youtube-dl gparted synaptic wifi-radar wireshark qemu unity-dark-theme net-tools)
 cnt_c10utils=${#c10utils[@]}
 
 list_c10utils () {
