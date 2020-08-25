@@ -234,7 +234,7 @@ install_c10utils () {
 	done
 }
 
-declare -a c10libs=(libpcap-dev libncurses5-dev libelf-dev libssl-dev ffmpeg libav-tools x264 x265)
+declare -a c10libs=(libpcap-dev libncurses5-dev libelf-dev libssl-dev ffmpeg libav-tools x264 x265 libz1 libncurses5 libbz2-1.0:i386 libstdc++6 libbz2-1.0)
 cnt_c10libs=${#c10libs[@]}
 
 list_c10libs () {
