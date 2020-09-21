@@ -25,11 +25,11 @@ AsyncNotifyFn ()
 
 # ACTIONFLAGS: Action Flags used by ShowRunCmdFn/CheckStatusFn individually or combined
 # Bit to display just a warning on error/failure without exiting, success means nothing
-AF_WOE=1
+AF_WE=1
 # Bit to display message on success; on failure default behaviour invoked - exit!
 AF_DS=2
 # Bits to display message on success and display warning on error/failure without exiting
-AF_DSWOE=3
+AF_DSWE=3
 
 # Check Status function to display error/success message and/or exit as per user choice
 # Usage  : CheckStatusFn <ExecStatus> <ActionFlag> <CmdString>
@@ -45,11 +45,11 @@ CheckStatusFn ()
 	ActionFlag=$1; shift #skip and move on to next function argument
 	CmdString=${@}
 	if [ $ExecStatus -ne 0 ]; then
-		(( $ActionFlag & $AF_WOE )) && StatTitleStr=ERROR || StatTitleStr=WARNING
+		(( $ActionFlag & $AF_WE )) && StatTitleStr=WARNING || StatTitleStr=ERROR
 		echo -e "\n******************************$StatTitleStr******************************"
 		echo -e "${CmdString}\n"
 		AsyncNotifyFn $ExecStatus ${CmdString}
-		if (( $ActionFlag ^ $AF_WOE )); then
+		if (( $ActionFlag ^ $AF_WE )); then #TODO handle warn-on-err and exit-on-error properly
 			if [ "${gLogFile}" ]; then
 				echo -e "Please check the log-file: ${gLogFile}"
 				echo -e "Backup ${gLogFile} if required as next build overwrites current contents"
@@ -73,18 +73,21 @@ gLearnerMode=1
 #          Following notifies of failure and exits if extracting some_package fails
 #          e.g. ShowRunCmdFn 0 tar -xf some_package.tar
 #          Following notifies of failure but doesn't exit; consider this as warning of failure
-#          e.g. ShowRunCmdFn AF_WOE ls /home/somepath/WE866C3.tar
+#          e.g. ShowRunCmdFn AF_WE ls /home/somepath/WE866C3.tar
 # Return : none
 ShowRunCmdFn ()
 {
 	ActionFlag=$1; shift #skip and move on to next function argument
 	echo -e "\n"${@}"\n"
 	[ $gLearnerMode -eq 1 ] && echo "Press ENTER to execute above command.." && read okay
+	[ "$gCurrentTask" ] && TaskString=$gCurrentTask && gCurrentTask="" || TaskString="$@"
 	"$@"
-	CheckStatusFn $? $ActionFlag "$@"
+	CheckStatusFn $? $ActionFlag "$TaskString"
 }
 
 DotConfigFile=111
 
-ShowRunCmdFn AF_DSWOE sed -i 's/# CONFIG_WIRELESS is not set/CONFIG_WIRELESS=y/' ${DotConfigFile}
-#ShowRunCmdFn 1 make zImage
+gCurrentTask="Update Wireless configuration parameters"
+ShowRunCmdFn AF_DSWE sed -i 's/# CONFIG_WIRELESS is not set/CONFIG_WIRELESS=y/' ${DotConfigFile}
+gCurrentTask="Build imx9 Kernel zImage"
+ShowRunCmdFn AF_DS make zImage
