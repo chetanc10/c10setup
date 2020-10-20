@@ -3,7 +3,7 @@
 
 if [ -z "$1" ]; then
 	# display usage if no parameters given
-	echo -e "Usage: extract.sh <path/file_name>.<zip|rar|bz2|gz|tar|tbz2|tgz|Z|7z|xz|ex|tar.bz2|tar.gz|tar.xz> [new]\n\t[new] is optional, and indicates the script to create a directory first and call for extraction"
+	echo -e "Usage: extract.sh <path/file_name>.<tar.bz2|tar.gz|tar.xz|tar|tbz2|tgz|rar|zip|7z|gz|Z|lzma|xz|bz2> [new]\n\t[new] is optional, and indicates the script to create a directory first and call for extraction"
 	exit 0
 elif [ ! -f "$1" ]; then
 	echo "'$1' - file does not exist"
@@ -67,8 +67,6 @@ case "$1" in
 		unxz "$1"                               ;;
 	*.bz2)
 		bunzip2 "$1"                            ;;
-	*.exe)
-		cabextract "$1"                         ;;
 	*)
 		echo "Bad Archive Type: '$1'"           ;;
 esac
