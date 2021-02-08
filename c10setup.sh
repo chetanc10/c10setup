@@ -285,7 +285,7 @@ list_c10scripts () {
 
 _install_c10script () {
 	sudo rm -f /usr/bin/$1
-	sudo ln -s "$file" /usr/bin/$1
+	sudo ln -s "$1" /usr/bin/$1
 	_notify_when_done $? "Install $1"
 }
 
