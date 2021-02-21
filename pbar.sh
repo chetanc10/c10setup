@@ -21,7 +21,9 @@ if [ $# -eq 0 ]; then
 # If no process name is given, we assume pbar.sh is invoked in a manner similar to:
 # time-taking-process ; pbar.sh
 	zenity --info --text "process from $name completed!" &
-	paplay /usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg
+	[ -f /usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg ] && AudioFlag=/usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg || \
+		[ -f /usr/share/sounds/freedesktop/stereo/phone-incoming-call.oga ] && AudioFlag=/usr/share/sounds/freedesktop/stereo/phone-incoming-call.oga
+	paplay $AudioFlag
 	exit 0
 fi
 
