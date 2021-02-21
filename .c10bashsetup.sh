@@ -48,7 +48,8 @@ alias gitd='git diff'
 alias gitl='git log'
 alias gitb='git branch'
 
-# Miscellaneous regulars #
+# For better color-coding and visibility of 'ls' output contents #
+export LS_COLORS="$LS_COLORS:ow=30;42:tw=30;42:";
 
 # Try including bash settings from a local file, if it exists.
 # This way we can make sure the project/confidential work specific
