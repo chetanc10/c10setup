@@ -163,7 +163,13 @@ _install_arc_dark () {
 	_notify_when_done $? "Install dark-theme"
 }
 
-declare -a c10utils=(vim cscope exuberant-ctags curl git at tree ifstat dconf-editor unity-tweak-tool valgrind minicom tftp-server lftp subversion meld ssh rar unrar openvpn vlc tomboy nmap artha skype youtube-dl gparted synaptic wifi-radar wireshark qemu unity-dark-theme net-tools)
+_install_archive_and_unarchive_tool () {
+	archive_tool=$(echo $1 | awk -F"_"  '{print $1}')
+	unarchive_tool=$(echo $1 | awk -F"_"  '{print $2}')
+	sudo apt-get install $archive_tool $unarchive_tool
+}
+
+declare -a c10utils=(vim cscope exuberant-ctags curl git at tree ifstat dconf-editor unity-tweak-tool valgrind minicom tftp-server lftp subversion meld ssh p7zip-full rar_unrar zip_unzip xz-utils bzip2 lzma_unlzma compress_uncompress openvpn vlc tomboy nmap artha skype youtube-dl gparted synaptic wifi-radar wireshark qemu unity-dark-theme net-tools)
 cnt_c10utils=${#c10utils[@]}
 
 list_c10utils () {
@@ -196,6 +202,9 @@ _install_c10util () {
 			;;
 		"unity-dark-theme")
 			_install_arc_dark
+			;;
+		"rar_unrar"|"zip_unzip"|"lzma_unlzma"|"compress_uncompress")
+			_install_archive_and_unarchive_tool $1
 			;;
 		*)
 			do_aptget_install=1
@@ -285,7 +294,7 @@ list_c10scripts () {
 
 _install_c10script () {
 	sudo rm -f /usr/bin/$1
-	sudo ln -s "$1" /usr/bin/$1
+	sudo ln -s $dir_c10setup/$1 /usr/bin/$1
 	_notify_when_done $? "Install $1"
 }
 
