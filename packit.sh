@@ -3,7 +3,7 @@
 
 if [ -z "$1" ]; then
 	# display usage if no parameters given
-	echo -e "Usage: compress.sh <path/file_name> <tar.bz2|tar.gz|tar.xz|tar|tbz2|tgz|rar|zip|7z|gz|Z|lzma|xz|bz2>"
+	echo -e "Usage: packit.sh <path/file_name> <tar.bz2|tar.gz|tar.xz|tar|tbz2|tgz|rar|zip|7z|gz|Z|lzma|xz|bz2>"
 	exit 0
 elif [ ! -e "$1" ]; then
 	echo "'$1' - file/folder does not exist"

@@ -47,9 +47,20 @@ alias gitp='git pull'
 alias gitd='git diff'
 alias gitl='git log'
 alias gitb='git branch'
+alias gitlog="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 
 # For better color-coding and visibility of 'ls' output contents #
 export LS_COLORS="$LS_COLORS:ow=30;42:tw=30;42:";
+
+# Various handy scripts
+wdir=${PWD}
+[ ! -f "${PWD}/2.sh" ] && \
+	(cd $(dirname $0) ; wdir=${PWD} ; cd - >/dev/null)
+alias lpmode.sh="${wdir}/lpmode.sh"
+alias packit.sh="${wdir}/packit.sh"
+alias unpack.sh="${wdir}/unpack.sh"
+alias pbar.sh="${wdir}/pbar.sh"
+alias vimindent.sh="${wdir}/vimindent.sh"
 
 # Try including bash settings from a local file, if it exists.
 # This way we can make sure the project/confidential work specific

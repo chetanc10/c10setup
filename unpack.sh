@@ -3,7 +3,7 @@
 
 if [ -z "$1" ]; then
 	# display usage if no parameters given
-	echo -e "Usage: extract.sh <path/file_name>.<tar.bz2|tar.gz|tar.xz|tar|tbz2|tgz|rar|zip|7z|gz|Z|lzma|xz|bz2> [new]\n\t[new] is optional, and indicates the script to create a directory first and call for extraction"
+	echo -e "Usage: unpack.sh <path/file_name>.<tar.bz2|tar.gz|tar.xz|tar|tbz2|tgz|rar|zip|7z|gz|Z|lzma|xz|bz2> [new]\n\t[new] is optional, and indicates the script to create a directory first and call for extraction"
 	exit 0
 elif [ ! -f "$1" ]; then
 	echo "'$1' - file does not exist"

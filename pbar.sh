@@ -40,25 +40,18 @@ fi
 
 terminated=$?
 if [ "$terminated" == "$FALSE" ]; then
-	echo -n "Shall I proceed to wait? [y|n]: "
+	read -p "Shall I proceed to wait? [y|n]: " yes
 	began_at=`date +%s`
-	read yes
-	if [ "$yes" != "y" ]; then
-		exit 0
-	fi
+	[ "$yes" != "y" ] && exit 0
 	echo "Going to wait now.."
-	while [ 1 ]
-	do
+	while [ 1 ]; do
 		ps aux | grep "$name" | grep -v grep | grep -v pbar.sh > /dev/null
 		terminated=$?
-		if [ "$terminated" == "$TRUE" ]; then
-			break
-		fi
+		[ "$terminated" == "$TRUE" ] && break
 		sleep 1
 	done
 	lapse=$((`date +%s` - $began_at))
-	echo $lapse
-	#notify-send "process from $name completed"
+	echo "$lapse seconds elapsed waiting for process completion/termination"
 	zenity --info --text "process from $name completed.\nLapse: $lapse" 2>/dev/null &
 	paplay /usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg &
 else
