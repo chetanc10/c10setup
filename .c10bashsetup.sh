@@ -53,14 +53,11 @@ alias gitlog="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %C
 export LS_COLORS="$LS_COLORS:ow=30;42:tw=30;42:";
 
 # Various handy scripts
-wdir=${PWD}
-[ ! -f "${PWD}/2.sh" ] && \
-	(cd $(dirname $0) ; wdir=${PWD} ; cd - >/dev/null)
-alias lpmode.sh="${wdir}/lpmode.sh"
-alias packit.sh="${wdir}/packit.sh"
-alias unpack.sh="${wdir}/unpack.sh"
-alias pbar.sh="${wdir}/pbar.sh"
-alias vimindent.sh="${wdir}/vimindent.sh"
+alias lpmode.sh="${c10dir}/lpmode.sh"
+alias packit.sh="${c10dir}/packit.sh"
+alias unpack.sh="${c10dir}/unpack.sh"
+alias pbar.sh="${c10dir}/pbar.sh"
+alias vimindent.sh="${c10dir}/vimindent.sh"
 
 # Try including bash settings from a local file, if it exists.
 # This way we can make sure the project/confidential work specific

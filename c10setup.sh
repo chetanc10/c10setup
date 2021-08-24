@@ -238,12 +238,14 @@ uninstall_c10rems ()
 
 setup_c10bash ()
 {
+	# Include sourcing of .c10bashsetup.sh in main .bashrc
 	local replacer="${dir_c10setup}/.c10bashsetup.sh"
-
 	# For paths/special variables/symbols in filenames to work properly in sed -s, make them specially parse-able using '\any-special-symbol'
 	replacer=$(printf '%s' "${replacer}" | sed 's/[[\.*/]/\\&/g; s/$$/\\&/; s/^^/\\&/')
-
 	sed -i -e "s/\~\/\.bash_aliases/${replacer}/g" /home/$USER/.bashrc
+
+	# Setup c10setupdir variable in main .bashrc
+	sed -i "s%# Alias definitions%c10dir=${dir_c10setup}\n# Alias definitions%" /home/$USER/.bashrc
 
 	echo "Setup done for c10bash"
 }
@@ -263,14 +265,14 @@ gInteract=0
 [ "$1" == "-i" ] && gInteract=1
 
 echo "Will do an update first to install any packages.."
-sudo apt-get update
-_notify_when_done $? "apt-get update"
-sudo apt-get install -f
-_notify_when_done $? "apt-get install -f"
+#sudo apt-get update
+#_notify_when_done $? "apt-get update"
+#sudo apt-get install -f
+#_notify_when_done $? "apt-get install -f"
 
 echo "Installing various tools/utilities"
-install_c10utils "must" "${must_c10utils[@]}"
-install_c10utils "optional" "${opt_c10utils[@]}"
+#install_c10utils "must" "${must_c10utils[@]}"
+#install_c10utils "optional" "${opt_c10utils[@]}"
 
 echo -e "Removing few tools/utilities which are not to c10's taste"
 read -p "Shall we remove packages/utilities? (y|n): " answer
