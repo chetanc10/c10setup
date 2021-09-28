@@ -10,10 +10,10 @@ set incsearch
 
 set smartindent
 
-set tabstop=4
+set tabstop=3
 
 " shift-width for one tab
-set shiftwidth=4
+set shiftwidth=3
 
 " Use spaces instead of tabs
 " set expandtab
