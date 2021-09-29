@@ -43,10 +43,10 @@ _notify_when_done ()
 	SoundPass=/usr/share/sounds/freedesktop/stereo/complete.oga
 	SoundFail=/usr/share/sounds/freedesktop/stereo/suspend-error.oga
 	if [ "$1" == "0" ]; then # Success case
-		[ -e $SoundPass ] && paplay $SoundPass &
+		[[ -z $(uname -a | grep "Microsoft") ]] && [ -e $SoundPass ] && paplay $SoundPass &
 		__alert_func "$2: SUCCESS"
 	else # Failure case
-		[ -e $SoundFail ] && paplay $SoundFail &
+		[[ -z $(uname -a | grep "Microsoft") ]] && [ -e $SoundFail ] && paplay $SoundFail &
 		failStr="$2: FAILURE"
 		[ "$3" ] && failStr=${failStr}"\nReason: $3"
 		__alert_func ${failStr}
@@ -171,7 +171,7 @@ install_c10utils ()
 	shift
 	c10utils=("$@")
 	if [ $optional -eq 1 ]; then
-		echo -ne "Optional packages are listed below:\n${c10utils[@]}\n"
+		echo -ne "\n\n----Optional packages are listed below:\n${c10utils[@]}\n"
 		echo "They're legit, but may be waste of disk if unwanted"
 		read -p "Enter 'n' if you don't want above right now: " no
 		[[ $no == "n" ]] && return 0
@@ -196,29 +196,25 @@ install_c10utils ()
 		else
 			_desc=$(apt-cache search ${i} | grep "^$i ")
 		fi
-		do_apt_install=0
+		echo -ne "\n\n----${_desc}\n"
 		case "$i" in
-			"skype") _install_skype ;;
-			"youtube-dl") _install_youtube_dl ;;
-			"qemu") _install_qemu ;;
-			"tftp-server") _install_tftp_server ;;
-			"vim") _install_vim; do_apt_install=1 ;;
-			"unity-dark-theme") _install_arc_dark ;;
+			"skype") InstallCmd=_install_skype ;;
+			"youtube-dl") InstallCmd=_install_youtube_dl ;;
+			"qemu") InstallCmd=_install_qemu ;;
+			"tftp-server") InstallCmd=_install_tftp_server ;;
+			"vim") InstallCmd=_install_vim;;
+			"unity-dark-theme") InstallCmd=_install_arc_dark ;;
 			"rar_unrar"|"zip_unzip"|"lzma_unlzma"|"compress_uncompress")
-				_install_archive_and_unarchive_tool $1 ;;
-			*) do_apt_install=1 ;;
+				InstallCmd="_install_archive_and_unarchive_tool $1" ;;
+			*) InstallCmd="sudo apt-get install -y $i" ;;
 		esac
-		if [ $do_apt_install -eq 1 ]; then
-			answer="y"
-			[ $gInteract -eq 1 ] && \
-				echo -ne "\n\n----${_desc}\n"
-				read -p "Install '$i'? (y|n): " answer
-			exit_if_requested $answer
-			[ "$answer" != "y" ] && continue
-			echo -e "Installing $i"
-			sudo apt-get install -y $i
-			_notify_when_done $? "Install $i"
-		fi
+		answer="y"
+		[ $gInteract -eq 1 ] && read -p "Install '$i'? (y|n): " answer
+		exit_if_requested $answer
+		[ "$answer" != "y" ] && continue
+		echo -e "Installing $i"
+		${InstallCmd}
+		_notify_when_done $? "Install $i"
 	done
 }
 
@@ -265,14 +261,14 @@ gInteract=0
 [ "$1" == "-i" ] && gInteract=1
 
 echo "Will do an update first to install any packages.."
-#sudo apt-get update
-#_notify_when_done $? "apt-get update"
-#sudo apt-get install -f
-#_notify_when_done $? "apt-get install -f"
+sudo apt-get update
+_notify_when_done $? "apt-get update"
+sudo apt-get install -f
+_notify_when_done $? "apt-get install -f"
 
 echo "Installing various tools/utilities"
-#install_c10utils "must" "${must_c10utils[@]}"
-#install_c10utils "optional" "${opt_c10utils[@]}"
+install_c10utils "must" "${must_c10utils[@]}"
+install_c10utils "optional" "${opt_c10utils[@]}"
 
 echo -e "Removing few tools/utilities which are not to c10's taste"
 read -p "Shall we remove packages/utilities? (y|n): " answer
