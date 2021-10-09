@@ -58,6 +58,7 @@ alias packit.sh="${c10dir}/packit.sh"
 alias unpack.sh="${c10dir}/unpack.sh"
 alias pbar.sh="${c10dir}/pbar.sh"
 alias vimindent.sh="${c10dir}/vimindent.sh"
+alias ydl.sh="${c10dir}/ydl.sh"
 
 # Try including bash settings from a local file, if it exists.
 # This way we can make sure the project/confidential work specific
