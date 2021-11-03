@@ -8,7 +8,7 @@ This is a program to setup essential/basic system utilities, libraries, custom-s
 Usage: c10setup.sh <Options>
 Options:
     -i - the script runs in interactive mode for each tool setup
-	-n - for non-interactive tool setup. optional tools are still setup 
+    -n - for non-interactive tool setup. optional tools are still setup 
          interactively, to avoid unwanted optional tool installations.
 
 - Interactive Tool Setup Choices:
@@ -241,7 +241,7 @@ setup_c10bash ()
 	sed -i -e "s/\~\/\.bash_aliases/${replacer}/g" /home/$USER/.bashrc
 
 	# Setup c10setupdir variable in main .bashrc
-	sed -i "s%# Alias definitions%c10dir=${dir_c10setup}\n# Alias definitions%" /home/$USER/.bashrc
+	sed -i "s%# Alias definitions%export c10dir=${dir_c10setup}\n# Alias definitions%" /home/$USER/.bashrc
 
 	echo "Setup done for c10bash"
 }
@@ -275,7 +275,7 @@ read -p "Shall we remove packages/utilities? (y|n): " answer
 [[ "$answer" == "y" ]] && uninstall_c10rems
 exit_if_requested $answer
 
-echo -ne "Setup c10 bash"
+echo -e "Setup c10 bash"
 setup_c10bash
 
 echo -e "\nTata!\n"
