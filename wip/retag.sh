@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# I'm here to help generate tags & cscope database for a given path with include/exclude options
-# As of now, only .c and .h files are supported
-# More options shall come -TODO
-
 UsageString="
 This script can build cscope and ctags database 
 1. abstracting advanced cscope/ctags usage 
@@ -36,8 +32,8 @@ Options:
 "
 
 _print_retag_usage () {
-	[ "$1" == "-h" ] && printf "$UsageString\n\n" && exit 0
-	exit -1
+	printf "$UsageString\n\n"
+	exit $1
 }
 
 CTAGS_OPTS=""
@@ -49,97 +45,64 @@ k_opts=""
 CSCOPE_FILES="./cscope.files"
 CTAGS_FILES="./ctags.files"
 
-NO=0
-YES=1
+# Parse the options
+while [[ $# -gt 0 ]]; do
+	opt="$1"
+	case ${opt} in
+		-h) _print_retag_usage 0 ;;
+		#-t)
+			#TagFileAppends=$1
+			#shift ; shift # move past argument key and value
+			#;;
+		#-x)
+			#shift; # move past argument key
+			#excludes=${1}
+			#file=$(echo $excludes | cut -d ','  -f1)
+			#FIND_OPTS=" -path $file -prune"
+			#excludes=$(echo $excludes | cut -d ',' -f2-)
+			#for file in ${excludes//,/ }; do
+				#FIND_OPTS="$FIND_OPTS -o -path $file -prune"
+			#done
+			#shift; # move past argument value
+			#;;
+		-k)
+			shift; # move past argument key
+			platform=${1}
+			FIND_OPTS="-path \".git\" -prune"
+			FIND_OPTS="$FIND_OPTS -o -path \"./tools/testing/selftests/powerpc\" -prune"
+			excludes="Documentation,samples,scripts,firmware,fs,crypto,certs,sound,security"
+			for file in ${excludes//,/ }; do
+				FIND_OPTS="$FIND_OPTS -o -path \"./$file\" -prune"
+			done
+			for dir in "./arch"/* ; do
+				[ "$(basename $dir)" == "$platform" ] && continue
+				FIND_OPTS="$FIND_OPTS -o -path $dir -prune"
+			done
+			shift; # move past argument value
+			;;
+		*)
+			echo "Invalid option: ${OPTARG}" 1>&2
+			_print_retag_usage -1
+			;;
+	esac
+done
 
-_await_retag_completion () {
-	while [ 1 ]; do
-		pgrep "ctags" > /dev/null || pgrep "cscope" > /dev/null
-		_done=$?
-		[ "$_done" == "$YES" ] && break
-		sleep 1
-	done
-}
-
-if true; then
-	### New approach WIP ###
-	# Parse the options
-	while [[ $# -gt 0 ]]; do
-		opt="$1"
-		case ${opt} in
-			-h)
-				_print_retag_usage -h
-				;;
-			-t)
-				echo "-t: Not supported yet"
-				shift
-				TagFileAppends=$1
-				shift
-				exit 0
-				;;
-			-x)
-				shift; # move on to next bash argument
-				excludes=${1}
-				file=$(echo $excludes | cut -d ','  -f1)
-				FIND_OPTS=" -path $file -prune"
-				excludes=$(echo $excludes | cut -d ',' -f2-)
-				for file in ${excludes//,/ }; do
-					FIND_OPTS="$FIND_OPTS -o -path $file -prune"
-				done
-				shift; # move on to next bash argument
-				;;
-			-k)
-				shift; # move on to next bash argument
-				platform=${1}
-				echo "platform: ${platform}"
-				FIND_OPTS="-path \"./arch/*\" ! -path \"./arch/$platform*\" -prune"
-				excludes="Documentation,samples,scripts,firmware,fs,crypto,certs,sound,security"
-				for file in ${excludes//,/ }; do
-					FIND_OPTS="$FIND_OPTS -o -path \"./$file\" -prune"
-				done
-				shift; # move on to next bash argument
-				;;
-			*)
-				echo "Invalid option: ${OPTARG}" 1>&2
-				_print_retag_usage "${opt}"
-				;;
-		esac
-	done
-	# Now that all options are parsed, process them
-	if [ "${FIND_OPTS}" ]; then
-		echo "Find-options: $FIND_OPTS"
-		find . ${FIND_OPTS} -o -name "*.c" > $CSCOPE_FILES
-		sed "s/\"//g" $CSCOPE_FILES > $CTAGS_FILES
-		read -p "okay this.." ok
-		CSCOPE_OPTS="-Rb -i $CSCOPE_FILES"
-		CTAGS_OPTS="-L $CTAGS_FILES"
-	else
-		echo "None $FIND_OPTS"
-		CSCOPE_OPTS="-Rb"
-		CTAGS_OPTS="-R"
-	fi
-
+# Now that all options are parsed, process them
+if [ "${FIND_OPTS}" ]; then
+	echo "find . \( ${FIND_OPTS} \) -o -name *.[ch] -print > $CSCOPE_FILES" > /tmp/fscope.sh
+	chmod +x /tmp/fscope.sh && /tmp/fscope.sh
+	sed "s/\"//g" $CSCOPE_FILES > $CTAGS_FILES
+	CSCOPE_OPTS="-Rb -k -i $CSCOPE_FILES"
+	CTAGS_OPTS="-L $CTAGS_FILES"
 else
-	### Old approach tested ###
-	if [ "$1" == "-i" ]; then
-		find . \( -iname "*.c" -or -iname "*.h" \) -exec echo '"{}" ' \; > $CSCOPE_FILES
-		find . \( -iname "*.c" -or -iname "*.h" \) > $CTAGS_FILES
-		if [ ! -s $CSCOPE_FILES ]; then
-			echo "No .c | .h files found!"
-			rm -rf $CSCOPE_FILES
-			exit -1
-		fi
-		CSCOPE_OPTS="-Rb -i $CSCOPE_FILES"
-		CTAGS_OPTS="-L $CTAGS_FILES"
-	else
-		CSCOPE_OPTS="-Rb"
-		CTAGS_OPTS="-R"
-	fi
-
+	echo "None $FIND_OPTS"
+	CSCOPE_OPTS="-Rb"
+	CTAGS_OPTS="-R"
 fi
 
+rm -rf cscope.out tags
 ctags $CTAGS_OPTS &
-cscope $CSCOPE_OPTS &
+cscope $CSCOPE_OPTS 
+while true; do pgrep "ctags" > /dev/null && sleep 1 || break; done
 
-_await_retag_completion
 exit 0
