@@ -50,8 +50,8 @@ vimCallFn ()
 			shift; # shift past this argument to next one
 		done
 	fi
-	#echo -e "vim $f -c\"source vimpro.vim\" -c\"call $v (${arglist})\"\n"
-	vim $f -c"source vimpro.vim" -c"call $v (${arglist})"
+	echo -e "vim $f -c\"source vimpro.vim\" -c\"call $v (${arglist})\"\n"
+	vim $f -c"source ${c10dir}/vimpro.vim" -c"call $v (${arglist})"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -83,13 +83,13 @@ while [[ $# -gt 0 ]]; do
 			;;
 		-l)
 			ValidateFilePathFn $2
-			vimCallFn $2 ConvertToSyslogInThisFile $3
+			vimCallFn $2 ConvertToSyslog $3 "single"
 			shift; shift # shift past current argument and value
 			shift; # shift past old print-function arg
 			;;
 		-L)
 			ValidateDirPathFn $2
-			vimCallFn $2 ConvertToSyslogInAllFiles $3
+			vimCallFn $2 ConvertToSyslog $3 "all"
 			shift; shift # shift past current argument and value
 			shift; # shift past old print-function arg
 			;;

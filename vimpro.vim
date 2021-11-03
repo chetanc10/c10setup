@@ -4,7 +4,7 @@ function! IndentThisFile ()
 endfunction
 
 function! IndentAllFiles ()
-	execute ":arg **/*.[ch] | argdo normal gg=G:w\<CR>"
+	execute "arg **/*.[ch] | argdo normal gg=G:w\<CR>"
 endfunction
 
 function! ReplaceStringInThisFile (oldr, newr)
@@ -15,29 +15,21 @@ function! ReplaceStringInAllFiles (oldr, newr)
 	execute "arg **/*.[ch] | argdo %s/".a:oldr."/".a:newr."/gce | update"
 endfunction
 
-function! ConvertToSyslogInThisFile (PrintFn)
+function! ConvertToSyslog (PrintFn, ConvType)
 	let l:logl = ['EMERG', 'ALERT', 'CRIT', 'ERR', 'WARNING', 'NOTICE', 'INFO', 'DEBUG']
 	for level in l:logl
+		echom " "
 		echom "******** vimpro: Crawl and replace for LOG_".level."? "
 		let l:yes = getchar ()
-		if (nr2char (l:yes) != "y")
-			continue
+		if (nr2char (l:yes) == "y")
+			if (a:ConvType == "all")
+				call ReplaceStringInAllFiles (a:PrintFn."\.\\\{\-\}(", "syslog (LOG_".level.", ")
+			else
+				call ReplaceStringInThisFile (a:PrintFn."\.\\\{\-\}(", "syslog (LOG_".level.", ")
+			endif
+			echom "******** vimpro: Done with LOG_".level
+			echom " "
 		endif
-		call ReplaceStringInThisFile (a:PrintFn."\.\\\{\-\}(", "syslog (LOG_".level.", ")
-		echom "******** vimpro: Done with LOG_".level
-	endfor
-endfunction
-
-function! ConvertToSyslogInAllFiles (PrintFn)
-	let l:logl = ['EMERG', 'ALERT', 'CRIT', 'ERR', 'WARNING', 'NOTICE', 'INFO', 'DEBUG']
-	for level in l:logl
-		echom "******** vimpro: Crawl and replace for LOG_".level."? "
-		let l:yes = getchar ()
-		if (nr2char (l:yes) != "y")
-			continue
-		endif
-		call ReplaceStringInAllFiles (a:PrintFn."\.\\\{\-\}(", "syslog (LOG_".level.", ")
-		echom "******** vimpro: Done with LOG_".level
 	endfor
 endfunction
 
