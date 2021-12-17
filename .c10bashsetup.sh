@@ -52,6 +52,9 @@ alias gitlog="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %C
 # For better color-coding and visibility of 'ls' output contents #
 export LS_COLORS="$LS_COLORS:ow=30;42:tw=30;42:";
 
+# ls display file size as human-readable size
+alias lh='ls -lh'
+
 # Various handy scripts
 alias lpmode.sh="${c10dir}/lpmode.sh"
 alias packit.sh="${c10dir}/packit.sh"

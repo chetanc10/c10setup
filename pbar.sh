@@ -1,62 +1,74 @@
 #!/bin/bash
 
-_print_pbar_usage () {
-	echo "Usage: pbar.sh [arg1] [-v]
-arg1:
-    -h           - for help, (discards -v if given)
-    name         - name of process to wait for completion
--v: optional, verbose mode"
-	[ $1 -eq 1 ] && echo "Don't use time-taking-process && pbar.sh since time-taking-process might return non-zero and pbar.sh wouldn't be invoked in such case"
-	exit -1
+gUsageString="
+Usage: $0 [-h] [proc-name]
+Options:
+[-h]         - display this help message and exits
+[proc-name]  - Optional, name of process to wait for completion
+               If [proc-name] is not given, the tool assumes that it should
+					alert user immediately. This is useful in cases like:
+					~$ <long-process> ; $0
+					NOTE: Don't use long-process <&&> $0 since
+					long-process might return non-zero and $0 wouldn't run
+"
+
+DisplayUsageFn () {
+	st=$1; shift;
+	[ $st -ne 0 ] && echo "ERROR: ${@}"
+	printf "\n${gUsageString}\n"
+	exit $st
 }
 
-[ $# -gt 2 ] && _print_pbar_usage 0
+AlertFn () {
+	[[ "$1" == "__LaPsE="* ]] && lapse=${1#"__LaPsE="} || lapse=0
+	AudioFile1="/usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg"
+	AudioFile2="/usr/share/sounds/freedesktop/stereo/phone-incoming-call.oga"
+	[ $lapse -gt 0 ] && lapseStr=" $lapse seconds elapsed" || lapseStr=""
+	[[ "${proc}" == "Prev" ]] && \
+		proc="Previous Process" || proc="Process '${proc}'"
+	zenity --info --text "${proc} complete.${lapseStr}" 2>/dev/null &
+	[ -f ${AudioFile1} ] && AudioFile=${AudioFile1} || \
+		[ -f ${AudioFile2} ] && AudioFile=${AudioFile2}
+	paplay $AudioFile
+}
 
-[ "$1" == "-h" ] && _print_pbar_usage 1
-[ "$1" == "-v" ] && _print_pbar_usage 0
+ProcFind () {
+	pn=$(ps aux | grep ${1} | grep -v "grep\|${pbar}")
+	pst=$?
+	echo $pst
+}
 
-([ $# -eq 2 ] && [ "$2" != "-v" ]) && _print_pbar_usage 0
+[ "$1" == "-h" ] && DisplayUsageFn 0
 
 if [ $# -eq 0 ]; then
-# If no process name is given, we assume pbar.sh is invoked in a manner similar to:
-# time-taking-process ; pbar.sh
-	zenity --info --text "process from $name completed!" &
-	[ -f /usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg ] && AudioFlag=/usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg || \
-		[ -f /usr/share/sounds/freedesktop/stereo/phone-incoming-call.oga ] && AudioFlag=/usr/share/sounds/freedesktop/stereo/phone-incoming-call.oga
-	paplay $AudioFlag
+	echo "No process name given"
+	proc="Prev"
+	# If no process name is given, pbar is invoked as :
+	# long-process ; pbar.sh
+	# We can't know that process name, so just call it 'Prev'
+	AlertFn "Prev"
 	exit 0
 fi
 
-name=$1
+pbar=$0
+proc=${@}
 
 FALSE=0
 TRUE=1
 
-if [ "$2" == "-v" ]; then
-	ps aux | grep "$name" | grep -v grep | grep -v pbar.sh
-else
-	ps aux | grep "$name" | grep -v grep | grep -v pbar.sh > /dev/null
+terminated=$(ProcFind ${proc})
+if [ $terminated -eq $TRUE ]; then
+	echo "${proc}: Process not found!" && exit -1
 fi
 
-terminated=$?
-if [ "$terminated" == "$FALSE" ]; then
-	read -p "Shall I proceed to wait? [y|n]: " yes
-	began_at=`date +%s`
-	[ "$yes" != "y" ] && exit 0
-	echo "Going to wait now.."
-	while [ 1 ]; do
-		ps aux | grep "$name" | grep -v grep | grep -v pbar.sh > /dev/null
-		terminated=$?
-		[ "$terminated" == "$TRUE" ] && break
-		sleep 1
-	done
-	lapse=$((`date +%s` - $began_at))
-	echo "$lapse seconds elapsed waiting for process completion/termination"
-	zenity --info --text "process from $name completed.\nLapse: $lapse" 2>/dev/null &
-	paplay /usr/share/sounds/ubuntu/stereo/phone-incoming-call.ogg &
-else
-	echo "$name: Process not found!"
-fi
-
+began_at=`date +%s`
+echo "Going to wait now.."
+while [ 1 ]; do
+	terminated=$(ProcFind ${proc})
+	[ $terminated -eq $TRUE ] && break
+	sleep 1
+done
+lapse=$(($(date +%s) - $began_at))
+AlertFn "__LaPsE=$lapse" ${proc}
 exit 0
 

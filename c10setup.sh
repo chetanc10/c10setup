@@ -161,7 +161,7 @@ _install_archive_and_unarchive_tool ()
 	sudo apt-get install -y $archive_tool $unarchive_tool
 }
 
-declare -a must_c10utils=(vim cscope exuberant-ctags curl git at tree ifstat minicom tftp-server meld ssh p7zip-full rar_unrar zip_unzip xz-utils bzip2 lzma_unlzma compress_uncompress pdfgrep nmap vlc artha net-tools exfat-fuse exfat-utils youtube-dl texinfo manpages-posix-dev)
+declare -a must_c10utils=(vim cscope exuberant-ctags curl git at tree ifstat minicom tftp-server meld ssh p7zip-full rar_unrar zip_unzip xz-utils bzip2 lzma_unlzma compress_uncompress pdfgrep nmap vlc artha net-tools exfat-fuse exfat-utils youtube-dl texinfo manpages-posix-dev yad)
 declare -a opt_c10utils=(dconf-editor unity-tweak-tool lftp subversion openvpn valgrind tomboy skype gparted synaptic qemu unity-dark-theme wifi-radar wireshark)
 
 install_c10utils ()
