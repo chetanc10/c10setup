@@ -1,22 +1,34 @@
 #!/bin/bash
 
+ch=""
+
+HandleThisFileFn ()
+{
+	file=${1}
+	read -p "Select - u(undo changes) | n(nothing) | d(diff) | x(exit) : " ch
+	if [ "$ch" == "d" ]; then
+		git diff ${file} > /tmp/fdiff.patch
+		echo "Opening diff file /tmp/fdiff.patch with Vim ..." ; sleep 1
+		vim -R /tmp/fdiff.patch
+		read -p "Undo changes in ${file}? (y|n|x): " ch
+		[ "$ch" == "y" ] && ch="u"
+	fi
+	[ "$ch" == "u" ] && git checkout ${file}
+}
+
 git status > gout
 cp gout jout
 sed -i '/modified:/!d' jout
-cut -f3- -d" " jout > jout1
-mv jout1 jout
 
-while true
-do
+while true; do
 	read -r file <&3
-	echo "modified: $file"
-	clear
-	git diff $file
-	echo -ne "Want to revert? (y|n|x): "
-	read _choice <&0
-	[ "$_choice" == "n" ] && continue
-	[ "$_choice" == "x" ] && break
-	git checkout $file
+	[ -z "${file}" ] && break
+	file=$(echo ${file}| awk '{print $2}')
+	clear -x && echo "***********Modified: ${file}"
+	HandleThisFileFn ${file}
+	[ "$ch" == "x" ] && break
 done 3<jout
+
+rm -rf jout
 
 exit 0
