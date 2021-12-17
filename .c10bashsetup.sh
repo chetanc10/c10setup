@@ -36,8 +36,8 @@ function c10t() {
 ##### Now the bash aliases #####
 
 # source code browsing #
-alias detag='rm -rf cscope.out; rm -rf tags'
-alias retag='cscope -Rb && ctags -R'
+alias detag='rm -rf tags cscope.out ncscope.out ctags.files cscope.files'
+alias retag.sh="${c10dir}/retag.sh"
 
 # Git specific - Oh we use them alot! #
 alias gitst='git status'
