@@ -30,6 +30,7 @@ dir_c10setup=`dirname $0`
 
 __alert_func ()
 {
+	kill -KILL `pgrep zenity` 2>/dev/null
 	if [ `which zenity` ] && [ -z "$SSH_TTY" ]; then
 		zenity --info --text="$1" 2>/dev/null
 	else # no zenity, just echo on terminal
@@ -44,13 +45,18 @@ _notify_when_done ()
 	SoundFail=/usr/share/sounds/freedesktop/stereo/suspend-error.oga
 	if [ "$1" == "0" ]; then # Success case
 		[[ -z $(uname -a | grep "Microsoft") ]] && [ -e $SoundPass ] && paplay $SoundPass &
-		__alert_func "$2: SUCCESS"
+		__alert_func "$2: SUCCESS" &
 	else # Failure case
 		[[ -z $(uname -a | grep "Microsoft") ]] && [ -e $SoundFail ] && paplay $SoundFail &
 		failStr="$2: FAILURE"
 		[ "$3" ] && failStr=${failStr}"\nReason: $3"
-		__alert_func ${failStr}
+		__alert_func ${failStr} &
 	fi
+}
+
+exit_if_requested ()
+{
+	[ "$1" == "x" ] && echo -e "\nExiting c10setup...\n" && exit 0
 }
 
 _install_skype ()
@@ -115,33 +121,31 @@ _install_tftp_server ()
 __do_save_prev_vim ()
 {
 	target=$1
-	if [ -d /home/$USER/$target ]; then
+	if [ -d ~/$target ]; then
 		echo "Any of the following can be done:"
 		echo "m: Move existing $target to .my$target in home directory so that you can't lose your existing plugins/addons"
 		echo "d: Remove existing $target with the risk of losing existing plugins you might have setup previously"
 		echo -ne "If m|d not chosen, I may merge existing with my own c10 vim setup files"
 		read -p "Your choice (m/d): " answer
 		if [ "$answer" ==  "m" ]; then
-			mv /home/$USER/$target /home/$USER/.my$target
+			mv ~/$target ~/.my$target
 		elif [ "$answer" ==  "d" ]; then
-			rm -rf /home/$USER/$target
+			rm -rf ~/$target
 		fi
 	fi
 }
 
 _install_vim ()
 {
-	sudo chown $USER /home/$USER/.viminfo && sudo chmod a+rw /home/$USER/.viminfo
+	sudo chown $USER ~/.viminfo && sudo chmod a+rw ~/.viminfo
 	read -p "for VIM, c10 provides .vim and .vimrc in c10setup. The .vim and .vimrc have some plugins and keymaps which become very handy for a Vimmer. If you want them, I can place them in your HOME as .vim and .vimrc replacing existing ones. Shall I install .vim/.vimrc?(y|n): " answer
-	if [ "$answer" == "y" ]; then
-		echo "Installing c10 collections for vim plugins and keymaps.. Good for you!"
-		__do_save_prev_vim ".vim"
-		mkdir /home/$USER/.vim
-		cp -r $dir_c10setup/.vim/* /home/$USER/.vim/
-		__do_save_prev_vim ".vimrc"
-		cp $dir_c10setup/.vimrc /home/$USER/.vimrc
-	fi
-	exit_if_requested $answer
+	exit_if_requested $answer; [ "$answer" != y ] && return
+	echo "Installing c10 collections for vim plugins and keymaps.. Good for you!"
+	__do_save_prev_vim ".vim"
+	mkdir ~/.vim
+	cp -r $dir_c10setup/.vim ~/
+	__do_save_prev_vim ".vimrc"
+	cp $dir_c10setup/.vimrc ~/.vimrc
 }
 
 _install_arc_dark ()
@@ -161,7 +165,7 @@ _install_archive_and_unarchive_tool ()
 	sudo apt-get install -y $archive_tool $unarchive_tool
 }
 
-declare -a must_c10utils=(vim cscope exuberant-ctags curl git at tree ifstat minicom tftp-server meld ssh p7zip-full rar_unrar zip_unzip xz-utils bzip2 lzma_unlzma compress_uncompress pdfgrep nmap vlc artha net-tools exfat-fuse exfat-utils youtube-dl texinfo manpages-posix-dev yad)
+declare -a must_c10utils=(terminator vim cscope exuberant-ctags curl git at tree ifstat minicom tftp-server meld ssh p7zip-full rar_unrar zip_unzip xz-utils bzip2 lzma_unlzma compress_uncompress pdfgrep nmap vlc artha net-tools exfat-fuse exfat-utils youtube-dl texinfo manpages-posix-dev yad)
 declare -a opt_c10utils=(dconf-editor unity-tweak-tool lftp subversion openvpn valgrind tomboy skype gparted synaptic qemu unity-dark-theme wifi-radar wireshark)
 
 install_c10utils ()
@@ -196,7 +200,7 @@ install_c10utils ()
 		else
 			_desc=$(apt-cache search ${i} | grep "^$i ")
 		fi
-		echo -ne "\n\n----${_desc}\n"
+		echo -ne "\n\n---- ${_desc}\n"
 		case "$i" in
 			"skype") InstallCmd=_install_skype ;;
 			"youtube-dl") InstallCmd=_install_youtube_dl ;;
@@ -209,9 +213,9 @@ install_c10utils ()
 			*) InstallCmd="sudo apt-get install -y $i" ;;
 		esac
 		answer="y"
-		[ $gInteract -eq 1 ] && read -p "Install '$i'? (y|n): " answer
-		exit_if_requested $answer
-		[ "$answer" != "y" ] && continue
+		([ $optional -eq 1 ] || [ $gInteract -eq 1 ]) && \
+			read -p "Install '$i'? (y|n): " answer
+		exit_if_requested $answer; [ "$answer" != y ] && continue
 		echo -e "Installing $i"
 		${InstallCmd}
 		_notify_when_done $? "Install $i"
@@ -223,13 +227,10 @@ uninstall_c10rems ()
 {
 	for i in "${c10rems[@]}"; do
 		read -p "\n\n****Remove '$i'? (y|n): " answer
-		[ "$answer" != "y" ] && continue
-		exit_if_requested $answer
-		sudo apt-get remove --purge $1 -y
-		_notify_when_done $? "Uninstall $1"
+		exit_if_requested $answer; [ "$answer" != y ] && continue
+		sudo apt-get remove --purge $i -y
+		_notify_when_done $? "Uninstall $i"
 	done
-	sudo apt-get autoremove
-	sudo apt-get autoclean
 }
 
 setup_c10bash ()
@@ -238,17 +239,12 @@ setup_c10bash ()
 	local replacer="${dir_c10setup}/.c10bashsetup.sh"
 	# For paths/special variables/symbols in filenames to work properly in sed -s, make them specially parse-able using '\any-special-symbol'
 	replacer=$(printf '%s' "${replacer}" | sed 's/[[\.*/]/\\&/g; s/$$/\\&/; s/^^/\\&/')
-	sed -i -e "s/\~\/\.bash_aliases/${replacer}/g" /home/$USER/.bashrc
+	sed -i -e "s/\~\/\.bash_aliases/${replacer}/g" ~/.bashrc
 
 	# Setup c10setupdir variable in main .bashrc
-	sed -i "s%# Alias definitions%export c10dir=${dir_c10setup}\n# Alias definitions%" /home/$USER/.bashrc
+	sed -i "s%# Alias definitions%export c10dir=${dir_c10setup}\n# Alias definitions%" ~/.bashrc
 
 	echo "Setup done for c10bash"
-}
-
-exit_if_requested ()
-{
-	[[ "$1" == "x" ]] && echo -e "\nExiting c10setup...\n" && exit 0
 }
 
 ## Start Of Bash Script SOBASS ##
@@ -274,6 +270,9 @@ echo -e "Removing few tools/utilities which are not to c10's taste"
 read -p "Shall we remove packages/utilities? (y|n): " answer
 [[ "$answer" == "y" ]] && uninstall_c10rems
 exit_if_requested $answer
+
+echo -e "Doing a autoremove and autoclean to remove and clean obsolete packages"
+sudo apt-get autoremove; sudo apt-get autoclean
 
 echo -e "Setup c10 bash"
 setup_c10bash

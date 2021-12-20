@@ -66,6 +66,6 @@ alias devimpro.sh="${c10dir}/devimpro.sh"
 # Try including bash settings from a local file, if it exists.
 # This way we can make sure the project/confidential work specific
 # environment/aliases without having to commit those details to git
-if [ -f /home/$USER/.c10bashsetup_local.sh ]; then
-	. /home/$USER/.c10bashsetup_local.sh
+if [ -f ~/.c10bashsetup_local.sh ]; then
+	. ~/.c10bashsetup_local.sh
 fi
