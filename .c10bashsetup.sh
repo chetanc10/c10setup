@@ -12,6 +12,9 @@ unset HISTFILESIZE
 HISTSIZE=5000
 HISTFILESIZE=10000
 
+# Disable bell sound from 'less' and it's associated/wrapper cmds (like 'man')
+export LESS="$LESS -Q"
+
 # subversion editor setting
 export SVN_EDITOR=vim
 
