@@ -59,28 +59,40 @@ FindOpts=""
 CscopeFile="./cscope.files"
 CtagsFile="./ctags.files"
 
+gIncDir=""
+
 gExcludes=()
+
+_AddToExcludesFn ()
+{
+	files=${@}
+	for file in ${files[@]}; do
+		[ -n "$gIncDir" ] && [ "$(basename $file)" == "$gIncDir" ] && continue
+		gExcludes+=(./${file})
+	done
+}
 
 AddToExcludesFn ()
 {
-	idir=""
+	gIncDir=""
 	if [ "$1" == "list" ]; then
 		shift 1
+		for fld in ${@}; do
+			[ -f ${fld} ] && _AddToExcludesFn ${fld} && continue
+			[ -d ${fld} ] && flist="${fld}"/*; _AddToExcludesFn ${flist[@]}
+		done
+		_AddToExcludesFn ${files[@]}
 	elif [ "$1" == "direx" ]; then
 		[ ! -d $3/$2 ] && echo "ERROR: $3/$2 doesn't exist!" && exit -2
-		idir=${2}
-		shift 2
+		gIncDir=${2}
+		files="${3}"/*
+		_AddToExcludesFn ${files[@]}
 	fi
-	files="${1}"/*
-	for file in ${files[@]}; do
-		[ -n "$idir" ] && [ "$(basename $file)" == "$idir" ] && continue
-		gExcludes+=(${file})
-	done
 }
 
 LoadExcludesFromExFileFn ()
 {
-	[ ! -e ${gXFile} ] && echo "No ${gXFile} to load excludes" && return
+	[ ! -e ${gXFile} ] && return
 	gExcludes=()
 	while true; do
 		read -r file <&3
@@ -162,7 +174,7 @@ fi
 if [ "${FindOpts}" ]; then
 	fscope="/tmp/fscope.sh"
 	echo "find . \( ${FindOpts} \) -o -name *.[ch] -print > $CscopeFile" > ${fscope}
-	chmod +x ${fscope} && ${fscope} && rm -rf ${fscope}
+	chmod +x ${fscope} && ${fscope} #&& rm -rf ${fscope}
 	sed "s/\"//g" $CscopeFile > $CtagsFile
 	CscopeOpts="-Rb $ktag -i $CscopeFile"
 	CtagsOpts="-L $CtagsFile"
