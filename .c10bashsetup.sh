@@ -40,7 +40,7 @@ function c10t() {
 
 # source code browsing #
 alias detag='rm -rf tags cscope.out ncscope.out ctags.files cscope.files .excludes'
-alias retag.sh="${c10dir}/retag.sh"
+alias retag="${c10dir}/retag.sh"
 
 # Git specific - Oh we use them alot! #
 alias gitst='git status'
@@ -59,12 +59,13 @@ export LS_COLORS="$LS_COLORS:ow=30;42:tw=30;42:";
 alias lh='ls -lh'
 
 # Various handy scripts
-alias lpmode.sh="${c10dir}/lpmode.sh"
-alias packit.sh="${c10dir}/packit.sh"
-alias unpack.sh="${c10dir}/unpack.sh"
-alias pbar.sh="${c10dir}/pbar.sh"
-alias ydl.sh="${c10dir}/ydl.sh"
-alias devimpro.sh="${c10dir}/devimpro.sh"
+alias lpmode="${c10dir}/lpmode.sh"
+alias packit="${c10dir}/packit.sh"
+alias unpack="${c10dir}/unpack.sh"
+alias pbar="${c10dir}/pbar.sh"
+alias ydl="${c10dir}/ydl.sh"
+alias devimpro="${c10dir}/devimpro.sh"
+alias gitmod="${c10dir}/gitmod.sh"
 
 # Try including bash settings from a local file, if it exists.
 # This way we can make sure the project/confidential work specific
