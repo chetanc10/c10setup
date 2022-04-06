@@ -47,7 +47,7 @@ alias gitst='git status'
 alias gitm='git checkout master'
 alias gitc='git checkout'
 alias gitp='git pull'
-alias gitd='git diff'
+alias gitd='LESS=-eFRX git diff'
 alias gitl='git log'
 alias gitb='git branch'
 alias gitlog="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
