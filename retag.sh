@@ -68,7 +68,7 @@ _AddToExcludesFn ()
 	files=${@}
 	for file in ${files[@]}; do
 		[ -n "$gIncDir" ] && [ "$(basename $file)" == "$gIncDir" ] && continue
-		gExcludes+=(./${file})
+		gExcludes+=(${file})
 	done
 }
 
