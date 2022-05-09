@@ -46,11 +46,45 @@ alias retag="${c10dir}/retag.sh"
 alias gitst='git status'
 alias gitm='git checkout master'
 alias gitc='git checkout'
+alias gitcfg='LESS=-eFRX git config -l'
 alias gitp='git pull'
 alias gitd='LESS=-eFRX git diff'
-alias gitl='git log'
+alias gitl='LESS=-eFRX git log'
 alias gitb='git branch'
-alias gitlog="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gitlog="LESS=-eFRX git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+gclone ()
+{
+	if [ -z "$1" ]; then
+		echo "Usage: gclone <repo-url+optional-branch-references>"
+		echo "gclone is same as git clone, but additionally -"
+		echo "1. Asks and sets up user.name and user.email for git config"
+		echo "2. Sets git config to use current branch on 'git push' automatically"
+		return -121
+	fi
+	git clone "${@}" || exit 0
+	args="${@}"
+	while [[ $# -gt 0 ]]; do
+		case "${1}" in
+			https://*|git@*) url="${1}"; break ;;
+			*) shift ;;
+		esac
+	done
+	if [ -z "${url}" ]; then
+		echo "Couldn't determine repo url with https or ssh"
+		return 0
+	fi
+	name=$(basename "${url}"); name=$(echo $name | awk -F. '{print $1}')
+	cd $name
+	git config push.default current
+	echo "Enter git user name and email for this git repo config."
+	echo "If name or email config is not wanted, just press <ENTER>"
+	read -p "user.name  : " un
+	[ -n "$un" ] && git config user.name "${un}"
+	read -p "user.email : " ue
+	[ -n "$ue" ] && git config user.email "${ue}"
+	cd ..
+}
+export -f gclone
 
 # For better color-coding and visibility of 'ls' output contents #
 export LS_COLORS="$LS_COLORS:ow=30;42:tw=30;42:";
