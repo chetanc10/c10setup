@@ -9,18 +9,26 @@ if [ $(wc -l ModifiedFilesList | awk '{print $1}') -eq 0 ]; then
 	exit 0
 fi
 
+ChooseActionFn ()
+{
+	file="${@}"
+	# Ensure user chooses a valid action
+	while true; do
+		clear -x && echo "***********Modified: ${file}"
+		read -p "Choose r(revert) | s(skip) | v(view diff) | x(exit): " op
+		case $op in
+			s) break ;;
+			r) git checkout "${file}"; break ;;
+			x) rm -rf ModifiedFilesList; exit 0 ;;
+			v) git diff "${file}" > /tmp/fdiff.patch
+				echo "Opening diff file of ${file} with Vim ..."; sleep 1
+				vim -R /tmp/fdiff.patch
+		esac
+	done
+}
+
 while read -r file <&3; do
-	file=$(echo ${file}| awk '{print $2}')
-	clear -x && echo "***********Modified: ${file}"
-	read -p "Choose u(undo diff) | n(do nothing) | d(view diff) | x(exit): " op
-	if [ "$op" == "d" ]; then
-		git diff ${file} > /tmp/fdiff.patch
-		echo "Opening diff file /tmp/fdiff.patch with Vim ..."; sleep 1
-		vim -R /tmp/fdiff.patch
-		read -p "Undo changes in ${file}? (y|n|x): " op
-		[ "$op" == "y" ] && git checkout ${file}
-	fi
-	[ "$op" == "x" ] && break
+	ChooseActionFn "$(echo ${file} | awk '{print $2}')"
 done 3<ModifiedFilesList
 
 rm -rf ModifiedFilesList
