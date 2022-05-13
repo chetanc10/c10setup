@@ -114,6 +114,8 @@ def ReadInput () :
         elif c in "abcdefghijklmnopqrstuvwxyz AHR" : buf.append (c)
         elif c == '\n' : return "".join (buf)
         elif c == '\x7f' : c = "\b \b"
+        if c == 'A' : print ("A ", end=''); return "A".join (buf)
+        if c == 'H' : print ("H ", end=''); return "H".join (buf)
         if c != "\b \b" or buf : sys.stdout.write (c); sys.stdout.flush ()
         if buf and c == "\b \b" : buf.pop ()
     return input ()
