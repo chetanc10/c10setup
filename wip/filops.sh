@@ -56,11 +56,10 @@ OpenFile ()
 	local finfo=$(file "${f}")
 	finfo=${finfo#*${f}: }
 	if [[ "${finfo,,}" =~ "text" ]]; then
-		gOpener=TextOpener
-	elif [[ "${finfo,,}" =~ "audio" ]]; then
-		gOpener=AudioOpener
-	elif [[ "${finfo,,}" =~ "media" ]]; then
-		gOpener=AvOpener
+		gOpener=txt
+	elif [[ "${finfo,,}" =~ "audio" ]] || \
+		[[ "${finfo,,}" =~ "media" ]]; then
+		gOpener=play
 	else
 		gOpener=""
 		echo "No app given to open ${1}" >&2 && return
@@ -119,6 +118,10 @@ while [[ $# -gt 0 ]]; do
 					gStartDir="${PWD}/${gStartDir}"
 				fi
 			fi
+			# gStartDir should be a valid directory
+			[ ! -d "${gStartDir}" ] && \
+				echo "${1}: Directory not found in ${PWD}" && \
+				exit -8
 			shift 2; # shift past arg and it's value
 			;;
 		*)
@@ -166,7 +169,7 @@ while read -r line <&3; do
 	#echo "${line%%=*} = ${line#*=}"
 	cmd="${line%%=*}"
 	case ${cmd} in
-		"xcap_AvOpener"|"xcap_AudioOpener"|"xcap_TextOpener")
+		"xcap_play"|"xcap_txt")
 			AppCmd=${line#*=}; AppName=${AppCmd%% *}
 			AddXcapFileOpeners ${cmd} ${AppName} ${AppCmd}
 			;;
