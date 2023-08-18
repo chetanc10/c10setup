@@ -5,11 +5,13 @@ _print_usage ()
 	printf "
 This is a program to setup essential/basic system utilities, libraries, custom-scripts etc with audio/visual notification support on each setup completion.
 
-Usage: c10setup.sh <Options>
-Options:
-    -i - the script runs in interactive mode for each tool setup
-    -n - for non-interactive tool setup. optional tools are still setup 
-         interactively, to avoid unwanted optional tool installations.
+Usage: c10setup.sh <Args>
+Args:
+    -i <y|n> - Switch for interactive tool/package installation. Disabled by default 
+               y => enable interactive mode
+               n => disable interactive mode
+               NOTE: Optional tool-setup is undeniably interactive, to avoid installing unwanted tools.
+    -u <usr> - user work type - 'o' for office, 'h' for home. Default is 'home'
 
 - Interactive Tool Setup Choices:
 <y|n|x> - For each tool-setup, the script will ask to choose to act, some of them generic as described below.
@@ -30,12 +32,11 @@ dir_c10setup=`dirname $0`
 
 __alert_func ()
 {
-	kill -KILL `pgrep zenity` 2>/dev/null
-	if [ `which zenity` ] && [ -z "$SSH_TTY" ]; then
+	#kill -KILL `pgrep zenity` 2>/dev/null
+	[ "$1" == *": SUCCESS" ] && \
+		[ `which zenity` ] && [ -z "$SSH_TTY" ] && \
 		zenity --info --text="$1" 2>/dev/null
-	else # no zenity, just echo on terminal
-		echo -e "$1"
-	fi
+	echo -e "\n$1\n\n"
 }
 
 # Invocation: _notify_when_done <$? or other status value> <package-name> <description or extra messages>
@@ -44,10 +45,10 @@ _notify_when_done ()
 	SoundPass=/usr/share/sounds/freedesktop/stereo/complete.oga
 	SoundFail=/usr/share/sounds/freedesktop/stereo/suspend-error.oga
 	if [ "$1" == "0" ]; then # Success case
-		[[ -z $(uname -a | grep "Microsoft") ]] && [ -e $SoundPass ] && paplay $SoundPass &
-		__alert_func "$2: SUCCESS" &
+		[[ -z $(uname -a | grep -i "microsoft") ]] && [ -e $SoundPass ] && paplay $SoundPass &
+		__alert_func "$2: SUCCESS"
 	else # Failure case
-		[[ -z $(uname -a | grep "Microsoft") ]] && [ -e $SoundFail ] && paplay $SoundFail &
+		[[ -z $(uname -a | grep -i "microsoft") ]] && [ -e $SoundFail ] && paplay $SoundFail &
 		failStr="$2: FAILURE"
 		[ "$3" ] && failStr=${failStr}"\nReason: $3"
 		__alert_func ${failStr} &
@@ -123,8 +124,8 @@ __do_save_prev_vim ()
 	target=$1
 	if [ -d ~/$target ]; then
 		echo "Any of the following can be done:"
-		echo "m: Move existing $target to .my$target in home directory so that you can't lose your existing plugins/addons"
-		echo "d: Remove existing $target with the risk of losing existing plugins you might have setup previously"
+		echo "m: Move existing $target to .my$target in home directory so that we don't lose existing plugins/addons"
+		echo "d: Remove existing $target with the risk of losing existing plugins setup previously"
 		echo -ne "If m|d not chosen, I may merge existing with my own c10 vim setup files"
 		read -p "Your choice (m/d): " answer
 		if [ "$answer" ==  "m" ]; then
@@ -138,9 +139,9 @@ __do_save_prev_vim ()
 _install_vim ()
 {
 	sudo chown $USER ~/.viminfo && sudo chmod a+rw ~/.viminfo
-	read -p "for VIM, c10 provides .vim and .vimrc in c10setup. The .vim and .vimrc have some plugins and keymaps which become very handy for a Vimmer. If you want them, I can place them in your HOME as .vim and .vimrc replacing existing ones. Shall I install .vim/.vimrc?(y|n): " answer
+	read -p "for VIM, c10 provides .vim and .vimrc in c10setup. The .vim and .vimrc have some plugins and keymaps which become very handy for a Vimmer. If wanted, I can place them in $HOME as .vim and .vimrc replacing existing ones. Shall I install .vim/.vimrc?(y|n): " answer
 	exit_if_requested $answer; [ "$answer" != y ] && return
-	echo "Installing c10 collections for vim plugins and keymaps.. Good for you!"
+	echo "Installing c10 collections for vim plugins and keymaps..!"
 	__do_save_prev_vim ".vim"
 	mkdir ~/.vim
 	cp -r $dir_c10setup/.vim ~/
@@ -150,7 +151,7 @@ _install_vim ()
 
 _install_arc_dark ()
 {
-	echo "I just need to add noobslab to ppa repo listing, update package list, install package 'arc-theme'.. Then you can use unity-tweak-tool to choose any theme"
+	echo "I just need to add noobslab to ppa repo listing, update package list, install package 'arc-theme'.. Then it can be used to choose any theme"
 	sudo add-apt-repository ppa:noobslab/themes
 	_notify_when_done $? "Install dark-theme"
 	sudo apt-get update
@@ -165,8 +166,33 @@ _install_archive_and_unarchive_tool ()
 	sudo apt-get install -y $archive_tool $unarchive_tool
 }
 
-declare -a must_c10utils=(terminator vim cscope exuberant-ctags curl git at tree ifstat minicom tftp-server meld ssh p7zip-full rar_unrar zip_unzip xz-utils bzip2 lzma_unlzma compress_uncompress pdfgrep nmap vlc artha net-tools exfat-fuse exfat-utils youtube-dl texinfo manpages-posix-dev yad)
-declare -a opt_c10utils=(dconf-editor unity-tweak-tool lftp subversion openvpn valgrind tomboy skype gparted synaptic qemu unity-dark-theme wifi-radar wireshark)
+declare -a must_c10utils=()
+declare -a opt_c10utils=()
+
+setup_utils_list ()
+{
+	# Setup mandatory-utils and optional-utils based on user environment and if it's Non-GUI system
+
+	# default must-have and optional tools
+	must_c10utils+=(vim cscope exuberant-ctags curl git at tree ifstat ssh p7zip-full rar_unrar zip_unzip xz-utils bzip2 lzma_unlzma compress_uncompress pdfgrep net-tools exfat-fuse exfat-utils manpages-posix-dev)
+	opt_c10utils=(meld tftp-server dconf-editor unity-tweak-tool subversion openvpn valgrind tomboy skype gparted synaptic qemu unity-dark-theme wifi-radar wireshark texinfo minicom nmap)
+
+	case "$OSTYPE" in
+		"linux-gnu"*|"msys"|"win32")
+			([ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "win32" ]) && \
+				echo "WSL: apt-get shall be used as in normal linux-gnu"
+			if [ $gUserEnv == "h" ]; then #home env
+				must_c10utils+=(terminator vlc artha youtube-dl yad)
+			else # office env
+				opt_c10utils+=(terminator vlc artha youtube-dl yad)
+			fi
+			;;
+		"cygwin"*|"freebsd"*|"darwin"*) echo "OS is '$OSTYPE'.. Not supported"; return 1 ;;
+		*) echo "OS is '$OSTYPE'.. Not a known OS type"; return 1 ;;
+	esac
+
+	return -1
+}
 
 install_c10utils ()
 {
@@ -177,7 +203,7 @@ install_c10utils ()
 	if [ $optional -eq 1 ]; then
 		echo -ne "\n\n----Optional packages are listed below:\n${c10utils[@]}\n"
 		echo "They're legit, but may be waste of disk if unwanted"
-		read -p "Enter 'n' if you don't want above right now: " no
+		read -p "Enter 'n' if above is not needed right now: " no
 		[[ $no == "n" ]] && return 0
 	fi
 	declare -A _descs=( \
@@ -250,11 +276,32 @@ setup_c10bash ()
 ## Start Of Bash Script SOBASS ##
 
 gInteract=0
+gUserEnv='h'
 
 # Check if this is just Usage info invocation
 [ $# == 0 ] && _print_usage 1
 
-[ "$1" == "-i" ] && gInteract=1
+
+while [[ $# -gt 0 ]]; do
+	opt="$1"
+	case ${opt} in
+		-i)
+			([ "$2" != "y" ] && [ "$2" != "n" ]) && _print_usage 2
+			[ "$2" == "y" ] && gInteract=1
+			shift 2
+			;;
+		-u)
+			case "$2" in
+				h|o) gUserEnv=$2 ;;
+				*) _print_usage 3 ;;
+			esac
+			shift 2
+			;;
+		*) echo "Unknown parameter: ${opt}" && _print_usage 4
+			;;
+	esac
+done
+([ "$1" == "-i" ] && [ "$2" == "y" ]) && gInteract=1
 
 echo "Will do an update first to install any packages.."
 sudo apt-get update
@@ -263,6 +310,8 @@ sudo apt-get install -f
 _notify_when_done $? "apt-get install -f"
 
 echo "Installing various tools/utilities"
+setup_utils_list
+exit
 install_c10utils "must" "${must_c10utils[@]}"
 install_c10utils "optional" "${opt_c10utils[@]}"
 
