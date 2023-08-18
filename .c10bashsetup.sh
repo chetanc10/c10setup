@@ -43,7 +43,7 @@ function c10t() {
 
 # source code browsing #
 alias detag='rm -rf tags cscope.out ncscope.out ctags.files cscope.files .excludes'
-alias retag="${c10dir}/retag.sh"
+alias retag="${c10s}/retag.sh"
 
 # Git specific - Oh we use them alot! #
 alias gitst='git status'
@@ -97,26 +97,26 @@ export LS_COLORS="$LS_COLORS:ow=30;42:tw=30;42:";
 alias lh='ls -lh'
 
 # Various handy scripts
-alias lpmode="${c10dir}/lpmode.sh"
-alias packit="${c10dir}/packit.sh"
-alias unpack="${c10dir}/unpack.sh"
-alias pbar="${c10dir}/pbar.sh"
-alias ydl="${c10dir}/ydl.sh"
-alias devimpro="${c10dir}/devimpro.sh"
-alias gitmod="${c10dir}/gitmod.sh"
+alias lpmode="${c10s}/lpmode.sh"
+alias packit="${c10s}/packit.sh"
+alias unpack="${c10s}/unpack.sh"
+alias pbar="${c10s}/pbar.sh"
+alias ydl="${c10s}/ydl.sh"
+alias devimpro="${c10s}/devimpro.sh"
+alias gitmod="${c10s}/gitmod.sh"
 
 # This is for gnu-screen based remote-ssh dev users
 # This screen-block does the following:
 #    1. Binds 'Esc+x' key-combo to help invoke screen from non-screen bash
-#    2. Copies/appends $c10dir/screenrc contents to ~/.screenrc
+#    2. Copies/appends $c10s/screenrc contents to ~/.screenrc
 #       These are customizations of screen key-bindings, behavior, navigation, etc
 #    2. Forces default shell startup in screen window always (can be exited by ctrl-d).
 #       To DISABLE screen auto-launch per each bash session, do the following:
-#       $ touch $c10dir/disable-c10-gnu-screen
+#       $ touch $c10s/disable-c10-gnu-screen
 #       If enabled, Screen can be either:
 #         a. a first-available prev detached-screen session, re-attached automatically OR
 #         b. a new screen session if there's no prev detached screen session
-if [ ! -f $c10dir/disable-c10-gnu-screen ]; then
+if [ ! -f $c10s/disable-c10-gnu-screen ]; then
 	wscreen () {
 		screen -ls >/dev/null && screen -RR || screen
 	}
@@ -125,8 +125,8 @@ if [ ! -f $c10dir/disable-c10-gnu-screen ]; then
 		bind -x '"\ex":"wscreen"'
 		# Ensure c10-screenrc is sourced in default ~/.screenrc
 		if [ ! -f ~/.screenrc ] || \
-			[ -z "$(grep -F "source $c10dir/c10-screenrc" ~/.screenrc 2>/dev/null)" ]; then
-			echo "source $c10dir/c10-screenrc" >> ~/.screenrc
+			[ -z "$(grep -F "source $c10s/c10-screenrc" ~/.screenrc 2>/dev/null)" ]; then
+			echo "source $c10s/c10-screenrc" >> ~/.screenrc
 		fi
 		# If there's any prev detached screen session, attach it
 		# Else, start a fresh screen session

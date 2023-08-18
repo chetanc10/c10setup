@@ -174,7 +174,7 @@ setup_utils_list ()
 	# Setup mandatory-utils and optional-utils based on user environment and if it's Non-GUI system
 
 	# default must-have and optional tools
-	must_c10utils+=(vim cscope exuberant-ctags curl git at tree ifstat ssh p7zip-full rar_unrar zip_unzip xz-utils bzip2 lzma_unlzma compress_uncompress pdfgrep net-tools exfat-fuse exfat-utils manpages-posix-dev)
+	must_c10utils+=(vim cscope exuberant-ctags curl git screen at tree ifstat ssh p7zip-full rar_unrar zip_unzip xz-utils bzip2 lzma_unlzma compress_uncompress pdfgrep net-tools exfat-fuse exfat-utils manpages-posix-dev)
 	opt_c10utils=(meld tftp-server dconf-editor unity-tweak-tool subversion openvpn valgrind tomboy skype gparted synaptic qemu unity-dark-theme wifi-radar wireshark texinfo minicom nmap)
 
 	case "$OSTYPE" in
@@ -268,7 +268,7 @@ setup_c10bash ()
 	sed -i -e "s/\~\/\.bash_aliases/${replacer}/g" ~/.bashrc
 
 	# Setup c10setupdir variable in main .bashrc
-	sed -i "s%# Alias definitions%export c10dir=${dir_c10setup}\n# Alias definitions%" ~/.bashrc
+	sed -i "s%# Alias definitions%export c10s=${dir_c10setup}\n# Alias definitions%" ~/.bashrc
 
 	echo "Setup done for c10bash"
 }
