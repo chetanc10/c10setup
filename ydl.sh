@@ -21,5 +21,6 @@ case $option in
 esac
 
 gnome-terminal -- bash -c \
-	"cd ~/Downloads; youtube-dl ${ydlOpt} \"${url}\"; read -p 'Press ENTER..'"
+	"cd ~/Downloads; yt-dlp ${ydlOpt} \"${url}\"; read -p 'Press ENTER..'"
+	#"cd ~/Downloads; youtube-dl ${ydlOpt} \"${url}\"; read -p 'Press ENTER..'"
 
