@@ -267,8 +267,9 @@ setup_c10bash ()
 	replacer=$(printf '%s' "${replacer}" | sed 's/[[\.*/]/\\&/g; s/$$/\\&/; s/^^/\\&/')
 	sed -i -e "s/\~\/\.bash_aliases/${replacer}/g" ~/.bashrc
 
-	# Setup c10setupdir variable in main .bashrc
+	# Setup c10s variable and alias in main .bashrc
 	sed -i "s%# Alias definitions%export c10s=${dir_c10setup}\n# Alias definitions%" ~/.bashrc
+	sed -i "s%# Alias definitions%alias c10s=\"cd ${dir_c10setup}\"\n# Alias definitions%" ~/.bashrc
 
 	echo "Setup done for c10bash"
 }
