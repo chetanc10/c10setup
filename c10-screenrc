@@ -1,0 +1,68 @@
+
+# Load /home/$USER/.bashrc
+shell -$SHELL
+
+# Call Screen-Meta-Key in short form as SMK
+
+# Reduce time for screen to consider esc-key follow-up commands
+maptimeout 5
+
+# Change default SMK (ctrl+a)
+escape ^[^[
+
+# Disable lockscreen keymap
+bind ^x
+bind x
+
+# Use 'SMK+x' to remove a screen-session
+bind x eval "kill" "remove"
+
+# Disable copy keymaps
+#  vim needs ctrl-left/right keymaps to jump forth/back on words
+bindkey ^[[1;5D stuff B
+bindkey ^[[1;5C stuff W
+#  vimrc may somtimes have needs shift+<arrows>
+bindkey ^[[1;2A stuff ":wincmd k"
+bindkey ^[[1;2B stuff ":wincmd j"
+bindkey ^[[1;2C stuff ":wincmd l"
+bindkey ^[[1;2D stuff ":wincmd h"
+#bindkey "^[[1;5C" echo ''
+#bindkey "^[[1;5D" echo ''
+
+# Use 'SMK+<v|h>' combination to start a new bash
+# in a new screen-split-window-sesion as a split window
+# is normally created for bash session to do something!
+# 'SMK+v' is vertical split
+# 'SMK+h' is vertical split
+bind v
+bind h
+bind v eval "split -v" "focus right" "screen"
+bind h eval "split" "focus down" "screen"
+
+
+# Navigating regions
+#bindkey "^[OA" focus up
+#bindkey "^[OB" focus down
+#bindkey "^[OC" focus right
+#bindkey "^[OD" focus left
+bind -k kl focus left
+bind -k kr focus right
+bind -k ku focus up
+bind -k kd focus down
+
+# Don't display the copyright page
+startup_message off # default: on
+
+# Disable vim lingering even after exit
+altscreen on
+
+# set screen session type as xterm
+term xterm
+
+# screen window names?
+# https://unix.stackexchange.com/questions/114505/gnu-screen-status-bar-how-to-make-it-display-shell-session-names
+hardstatus alwayslastline
+shelltitle 'bash'
+hardstatus string "%{.bW}%-w%{.gW}%n %t%{-}%+w"
+#hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
+#hardstatus string '%{gk}[%{wk}%?%-Lw%?%{=b kR}(%{W}%n*%f %t%?(%u)%?%{=b kR})%{= w}%?%+Lw%?%? %{g}][%{d}%l%{g}][ %{= w}%Y/%m/%d %0C:%s%a%{g} ]%{W}'

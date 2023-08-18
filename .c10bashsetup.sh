@@ -24,6 +24,9 @@ export EDITOR=vim
 # key-map to invoke "vim ."
 bind -x '"\C-o":"vim ."'
 
+# Deduplicate ~/.bash_history per session in background!
+(tac ~/.bash_history | awk '!visited[$0]++' | tac > nbh; mv nbh ~/.bash_history) &
+
 # Simplify normal user prompt string
 PROMPT_COMMAND='echo -ne "\033]0;${PWD}\007"'
 PS1='${debian_chroot:+($debian_chroot)}\W\$ '
@@ -49,9 +52,10 @@ alias gitc='git checkout'
 alias gitcfg='LESS=-eFRX git config -l'
 alias gitp='git pull'
 alias gitd='LESS=-eFRX git diff'
-alias gitl='LESS=-eFRX git log'
-alias gitb='git branch'
-alias gitlog="LESS=-eFRX git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gitb='LESS=-eFRX git branch'
+alias gitr='LESS=-eFRX git remove -v'
+alias gitlog='LESS=-eFRX git log'
+alias gitl="LESS=-eFRX git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 gclone ()
 {
 	if [ -z "$1" ]; then
@@ -100,6 +104,38 @@ alias pbar="${c10dir}/pbar.sh"
 alias ydl="${c10dir}/ydl.sh"
 alias devimpro="${c10dir}/devimpro.sh"
 alias gitmod="${c10dir}/gitmod.sh"
+
+# This is for gnu-screen based remote-ssh dev users
+# This screen-block does the following:
+#    1. Binds 'Esc+x' key-combo to help invoke screen from non-screen bash
+#    2. Copies/appends $c10dir/screenrc contents to ~/.screenrc
+#       These are customizations of screen key-bindings, behavior, navigation, etc
+#    2. Forces default shell startup in screen window always (can be exited by ctrl-d).
+#       To DISABLE screen auto-launch per each bash session, do the following:
+#       $ touch $c10dir/disable-c10-gnu-screen
+#       If enabled, Screen can be either:
+#         a. a first-available prev detached-screen session, re-attached automatically OR
+#         b. a new screen session if there's no prev detached screen session
+if [ ! -f $c10dir/disable-c10-gnu-screen ]; then
+	wscreen () {
+		screen -ls >/dev/null && screen -RR || screen
+	}
+	if [ -z "$STY" ]; then
+		# Shortcut 'Esc+x' to launch screen
+		bind -x '"\ex":"wscreen"'
+		# Ensure c10-screenrc is sourced in default ~/.screenrc
+		if [ ! -f ~/.screenrc ] || \
+			[ -z "$(grep -F "source $c10dir/c10-screenrc" ~/.screenrc 2>/dev/null)" ]; then
+			echo "source $c10dir/c10-screenrc" >> ~/.screenrc
+		fi
+		# If there's any prev detached screen session, attach it
+		# Else, start a fresh screen session
+		wscreen
+	else
+		# bash started in screen, 'reset' tty to fix input/output issue
+		reset
+	fi
+fi
 
 # Try including bash settings from a local file, if it exists.
 # This way we can make sure the project/confidential work specific
