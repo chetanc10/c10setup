@@ -149,3 +149,5 @@ execute pathogen#infect()
 syntax on
 filetype indent on
 
+set visualbell
+set t_vb=
