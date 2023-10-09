@@ -47,7 +47,6 @@ alias retag="${c10s}/retag.sh"
 
 # Git specific - Oh we use them alot! #
 alias gitst='git status'
-alias gitm='git checkout master'
 alias gitc='git checkout'
 alias gitcfg='LESS=-eFRX git config -l'
 alias gitp='git pull'
