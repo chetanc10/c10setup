@@ -4,10 +4,11 @@ Usage="Usage: stacker.sh <src-directory> [src-dir/sub-dir]"
 
 [[ -z "$1" ]] && echo $Usage && exit -1
 
-tel=/home/$USER/Music/miks_telugu
-hin=/home/$USER/Music/miks_hindi
-eng=/home/$USER/Music/miks_english
-oth=/home/$USER/Music/miks_other
+tel=/home/$USER/Music/mixtel
+hin=/home/$USER/Music/mixhin
+eng=/home/$USER/Music/mixeng
+oth=/home/$USER/Music/mixoth
+sou=/home/$USER/Music/mixsouth
 
 echo "For stacking choices:
 	RET : do nothing and proceed to next entry
@@ -16,6 +17,7 @@ echo "For stacking choices:
 	h   : move the current file to directory" $hin"
 	e   : move the current file to directory" $eng"
 	o   : move the current file to directory" $oth"
+	s   : move the current file to directory" $sou"
 	x|q : exit the utility right now!
 	"
 
@@ -23,6 +25,7 @@ mkdir -p $tel
 mkdir -p $hin
 mkdir -p $eng
 mkdir -p $oth
+mkdir -p $sou
 
 [[ "$2" == */ ]] && offset_dir=${2::-1} || offset_dir="$2"
 [[ "$1" == */ ]] && main_dir=${1::-1} || main_dir="$1"
@@ -42,6 +45,8 @@ take_action () {
 		e) mv "$2" $eng/
 			;;
 		o) mv "$2" $oth/
+			;;
+		o) mv "$2" $sou/
 			;;
 		x|q) echo "Exiting.." >&2 ; retval=-1
 			;;
@@ -136,5 +141,10 @@ fi
 if [ `ls -A $oth | wc -l` -eq 0 ]; then
 	#echo "Removing empty directory: $oth";
 	rm -rf $oth
+fi
+
+if [ `ls -A $sou | wc -l` -eq 0 ]; then
+	#echo "Removing empty directory: $sou";
+	rm -rf $sou
 fi
 
