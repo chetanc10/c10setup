@@ -56,6 +56,7 @@ alias gitb='LESS=-eFRX git branch'
 alias gitr='LESS=-eFRX git remove -v'
 alias gitlog='LESS=-eFRX git log'
 alias gitl="LESS=-eFRX git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gitblame="${c10s}/gitblame.sh"
 gclone ()
 {
 	if [ -z "$1" ]; then

@@ -126,6 +126,18 @@ function! Qscope()
 	endif
 endfunction
 
+" gblame - git-blame from within vim session on current file
+" Opens a vim-split window which can later be closed normally
+nnoremap <leader>g :call Gblame()<cr>
+function! Gblame()
+	let gbl_output = system("${c10s}/gitblame.sh " . expand('%'))
+	if v:shell_error == 0
+		vsp /tmp/gbl
+	else
+		echo gbl_output
+	endif
+endfunction
+
 " comment selected lines in visual mode
 " vmap <C-K> <S-i>//<Esc>
 
