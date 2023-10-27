@@ -191,7 +191,7 @@ setup_utils_list ()
 		*) echo "OS is '$OSTYPE'.. Not a known OS type"; return 1 ;;
 	esac
 
-	return -1
+	return 0
 }
 
 install_c10utils ()
@@ -311,7 +311,7 @@ sudo apt-get install -f
 _notify_when_done $? "apt-get install -f"
 
 echo "Installing various tools/utilities"
-setup_utils_list
+setup_utils_list || exit $?
 install_c10utils "must" "${must_c10utils[@]}"
 install_c10utils "optional" "${opt_c10utils[@]}"
 
