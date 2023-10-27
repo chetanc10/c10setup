@@ -326,5 +326,17 @@ sudo apt-get autoremove; sudo apt-get autoclean
 echo -e "Setup c10 bash"
 setup_c10bash
 
+echo -e "\nc10setup supports setup of bash terminal with gnu-screen"
+echo -e "\nIf enabled, any further terminal sessions start under gnu-screen"
+echo -e "  with custom shortcuts given in ${dir_c10setup}/c10-screenrc"
+echo -e "\nIf disabled, gnu-screen won't be auto-invoked for further sessions"
+echo -e "\nIn future to enable/disable this, following is useful."
+echo -e "Enable: touch ${dir_c10setup}/disable-c10-gnu-screen"
+echo -e "Disable: rm -rf ${dir_c10setup}/disable-c10-gnu-screen\n"
+read -p "Enable gnu-screen based local terminal by default? (y|n): " answer
+[[ "$answer" == "y" ]] && \
+	rm -rf "${dir_c10setup}/disable-c10-gnu-screen" || \
+	touch "${dir_c10setup}/disable-c10-gnu-screen"
+
 echo -e "\nTata!\n"
 exit 0
