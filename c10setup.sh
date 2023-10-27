@@ -312,7 +312,6 @@ _notify_when_done $? "apt-get install -f"
 
 echo "Installing various tools/utilities"
 setup_utils_list
-exit
 install_c10utils "must" "${must_c10utils[@]}"
 install_c10utils "optional" "${opt_c10utils[@]}"
 
