@@ -65,11 +65,11 @@ gclone ()
 		echo "2. Sets git config to use current branch on 'git push' automatically"
 		return -121
 	fi
-	git clone "${@}" || exit 0
-	args="${@}"
+	local args="${@}"
+	local url=""
 	while [[ $# -gt 0 ]]; do
 		case "${1}" in
-			https://*|git@*) url="${1}"; break ;;
+			https://*|git@*|ssh://*) url="${1}"; break ;;
 			*) shift ;;
 		esac
 	done
@@ -77,6 +77,7 @@ gclone ()
 		echo "Couldn't determine repo url with https or ssh"
 		return 0
 	fi
+	git clone "${@}" || return -1
 	name=$(basename "${url}"); name=$(echo $name | awk -F. '{print $1}')
 	cd $name
 	git config push.default current
