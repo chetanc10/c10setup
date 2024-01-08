@@ -35,7 +35,6 @@ PlayHow: \n\
 
 import os
 import sys
-import serial
 import time
 import re
 import platform
