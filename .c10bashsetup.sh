@@ -56,6 +56,20 @@ alias gitr='LESS=-eFRX git remote -v'
 alias gitl="LESS=-eFRX git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 alias gitlog='LESS=-eFRX git log'
 alias gitblame="${c10s}/gitblame.sh"
+ghpush ()
+{
+	# Push command specific to git-push for github.com
+	# Arguments can be similar to git-push
+	ssh -T git@github.com >/dev/null 2>&1 && \
+		git push "${@}" && return 0
+	# key unrecognised, add it (again) and try ssh
+	eval "$(ssh-agent -s)"
+	ssh-add ~/.ssh/id_ed25519_c10gh
+	ssh -T git@github.com >/tmp/github-ssh 2>&1 && \
+		cat /tmp/github-ssh && return 1
+	git push "${@}"
+	return 0
+}
 gclone ()
 {
 	if [ -z "$1" ]; then
