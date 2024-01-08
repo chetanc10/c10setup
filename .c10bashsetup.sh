@@ -53,8 +53,8 @@ alias gitp='git pull'
 alias gitd='LESS=-eFRX git diff'
 alias gitb='LESS=-eFRX git branch'
 alias gitr='LESS=-eFRX git remote -v'
-alias gitl='LESS=-eFRX git log'
-alias gitlog="LESS=-eFRX git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gitl="LESS=-eFRX git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gitlog='LESS=-eFRX git log'
 alias gitblame="${c10s}/gitblame.sh"
 gclone ()
 {
