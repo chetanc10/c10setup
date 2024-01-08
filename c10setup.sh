@@ -235,7 +235,7 @@ install_c10utils ()
 			"vim") InstallCmd=_install_vim;;
 			"unity-dark-theme") InstallCmd=_install_arc_dark ;;
 			"rar_unrar"|"zip_unzip"|"lzma_unlzma"|"compress_uncompress")
-				InstallCmd="_install_archive_and_unarchive_tool $1" ;;
+				InstallCmd="_install_archive_and_unarchive_tool $i" ;;
 			*) InstallCmd="sudo apt-get install -y $i" ;;
 		esac
 		answer="y"
