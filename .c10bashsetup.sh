@@ -64,11 +64,15 @@ ghpush ()
 		git push "${@}" && return 0
 	# key unrecognised, add it (again) and try ssh
 	eval "$(ssh-agent -s)"
+	local sagent="$(pgrep ssh-agent)"
+	[ -z "$sagent" ] && return 1
 	ssh-add ~/.ssh/id_ed25519_c10gh
-	ssh -T git@github.com >/tmp/github-ssh 2>&1 && \
-		cat /tmp/github-ssh && return 1
-	git push "${@}"
-	return 0
+	ssh -T git@github.com >/tmp/github-ssh 2>&1
+	local st=$? #Successful ssh from above returns '1'
+	[ $st -ne 1 ] && cat /tmp/github-ssh || git push "${@}"
+	rm -rf /tmp/github-ssh
+	kill -KILL $sagent
+	return $st
 }
 gclone ()
 {
