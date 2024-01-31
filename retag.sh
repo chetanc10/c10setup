@@ -9,12 +9,12 @@ Usage: retag.sh <Options>
 
 Options:
     -h              - displays this help message & exits (discards other args)
-	 -v              - verbose output (print time taken & size of DB files)
+    -v              - verbose output (print time taken & size of DB files)
     -x <filenames>  - names of files/directories to exclude from cscope/ctags
-                      database build.
+                      database build; names are separated with spaces.
                       For specific files with type-<EXT>ensions, give .<EXT>
-                      as in .java,.cpp
-                      e.g. -x build,bin,x86,Documentation,tools,.java
+                      as in .java .cpp .asm
+                      e.g. -x build bin x86 Documentation tools .java
     -xi <main/sub>  - name of directory to include exclusively, i.e., include
                       just one folder <sub> & exclude all other folder/files
                       from <main>
@@ -28,22 +28,22 @@ Options:
                       e.g. -k arm64
                       which is equivalent to:
                       -t asm,s -xi arch/arm64 \
-								 -x Documentation,samples,tools,scripts,firmware
+                         -x Documentation samples tools scripts firmware
 NOTE:
-1. With no options, user can just create a .excludes file in current directory
+1. User can just create a .excludes file in current directory instead of using -x
    with each line pointing to a file or directory as relative paths.
    e.g. contents in .excludes
-	./fs/ext4
-	./examples
+   ./fs/ext4
+   ./examples
 2. -k, -x, -xi options are needed only once, as it creates a .excludes file 
    once and next time $0 is run, it reads .excludes and lists to-exclude-files
 "
-#-t <filetypes>  - include specific infrequent file types as a comma list 
+#-t <filetypes>  - include specific infrequent file types as a spaced list 
 #with no spaces:
 #Expected args: asm s html (more may be added later)
-#e.g. -t asm,html
+#e.g. -t asm html
 #Frequent file types get included by default & 
-#not needed by -t: c, cpp, h, hpp, asm, s, java
+#not needed by -t: c cpp h hpp asm s java
 
 _print_retag_usage () {
 	printf "$gUsageString\n\n"
@@ -65,10 +65,10 @@ gExcludes=()
 
 _AddToExcludesFn ()
 {
-	files=${@}
+	local files=${@}
 	for file in ${files[@]}; do
 		[ -n "$gIncDir" ] && [ "$(basename $file)" == "$gIncDir" ] && continue
-		gExcludes+=(${file})
+		gExcludes+=("./"${file})
 	done
 }
 
@@ -77,13 +77,15 @@ AddToExcludesFn ()
 	gIncDir=""
 	if [ "$1" == "list" ]; then
 		shift 1
-		for fld in ${@}; do
+		local flist="${@}"
+		for fld in ${flist%%-*}; do
 			[ -f ${fld} ] && _AddToExcludesFn ${fld} && continue
-			[ -d ${fld} ] && flist="${fld}"/*; _AddToExcludesFn ${flist[@]}
+			[ ! -d ${fld} ] && continue
+			local flist1="${fld}"/*
+			_AddToExcludesFn ${flist1[@]}
 		done
-		_AddToExcludesFn ${files[@]}
 	elif [ "$1" == "direx" ]; then
-		[ ! -d $3/$2 ] && echo "ERROR: $3/$2 doesn't exist!" && exit -2
+		[ ! -d $3/$2 ] && echo "ERROR: $3/$2 doesn't exist!" >&2 && exit -2
 		gIncDir=${2}
 		files="${3}"/*
 		_AddToExcludesFn ${files[@]}
@@ -121,13 +123,17 @@ while [[ $# -gt 0 ]]; do
 		-v) gVerbose=1
 			shift 1
 			;;
-		-x) AddToExcludesFn list ${2//,/ }
+		-x) shift 1
+			AddToExcludesFn list "${@}"
+			shift $(echo "${@%%-*}" | wc -w)
 			SaveExcludesToExFileFn
-			shift 2; # move past argument key and value
+			#shift 2; # move past argument key and value
 			;;
-		-xi) AddToExcludesFn direx $(basename ${2}) $(dirname ${2})
+		-xi) shift 1
+			AddToExcludesFn direx $(basename ${2}) $(dirname ${2})
+			shift $(echo "${@%%-*}" | wc -w)
 			SaveExcludesToExFileFn
-			shift 2; # move past argument key and value
+			#shift 2; # move past argument key and value
 			;;
 		-k)
 			# If kernel-exclude-listing-file is absent, 
@@ -193,10 +199,10 @@ if [ $gVerbose == 1 ]; then
 	for file in ${dbfiles[@]}; do
 		[ ! -f ${file} ] && continue
 		fsz=$(du -hb ${file} | awk '{print $1}')
-		printf "%-26s: $fsz Bytes\n" "${file} DB size"
+		printf "%-26s: $fsz Bytes\t ($(du -hs ${file} | awk '{print $1}')B)\n" "${file} DB size"
 		dbsz=$((dbsz+$fsz))
 	done
-	printf "%-26s: ${dbsz} Bytes\n\n" "Total DB size"
+	printf "%-26s: ${dbsz} Bytes\t ($((dbsz/1024/1024))MB)\n\n" "Total DB size"
 fi	
 
 exit 0
