@@ -22,7 +22,12 @@ export SVN_EDITOR=vim
 export EDITOR=vim
 
 # key-map to invoke "vim ."
-bind -x '"\C-o":"vim ."'
+OpenVim ()
+{
+	[ -f Session.vim ] && vim -S Session.vim || vim .
+	return 0
+}
+bind -x '"\C-o":"OpenVim ."'
 
 # Deduplicate ~/.bash_history per session in background!
 (tac ~/.bash_history | awk '!visited[$0]++' | tac > nbh; mv nbh ~/.bash_history) &
