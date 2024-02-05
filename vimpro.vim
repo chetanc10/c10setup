@@ -3,16 +3,16 @@ function! IndentThisFile ()
 	execute "arg % | argdo normal gg=G:wq\<CR>"
 endfunction
 
-function! IndentAllFiles ()
-	execute "arg **/*.[ch] | argdo normal gg=G:w\<CR>"
+function! IndentAllFiles (dir)
+	execute "arg ".a:dir."/**/*.[ch] | argdo normal gg=G:w\<CR>"
 endfunction
 
 function! ReplaceStringInThisFile (oldr, newr)
 	execute "%s/".a:oldr."/".a:newr."/gce | update"
 endfunction
 
-function! ReplaceStringInAllFiles (oldr, newr)
-	execute "arg **/*.[ch] | argdo %s/".a:oldr."/".a:newr."/gce | update"
+function! ReplaceStringInAllFiles (dir, oldr, newr)
+	execute "arg ".a:dir."**/*.[ch] | argdo %s/".a:oldr."/".a:newr."/gce | update"
 endfunction
 
 function! ConvertToSyslog (PrintFn, ConvType)

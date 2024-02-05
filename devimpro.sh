@@ -17,7 +17,7 @@ NOTES:
 
 DisplayUsageFn ()
 {
-	st=$1
+	local st=$1
 	shift
 	[ $st -ne 0 ] && echo "ERROR: ${@}"
 	printf "${gUsageString}\n"
@@ -39,19 +39,20 @@ ValidateDirPathFn ()
 
 vimCallFn ()
 {
-	f="${1}"
-	v="${2}"
-	shift; shift; # shift past filename and vim function name
+	local f="${1}"
+	local vfunc="${2}"
+	shift 2 # shift past filename and vim function name
+	local arglist=""
 	if [ $# -gt 0 ]; then
-		arglist="'$1'"
+		[ -d "$f" ] && arglist="'$f', '$1'" || arglist="'$1'"
 		shift; # shift past this argument to next one
 		while [[ $# -gt 0 ]]; do
-			arglist=${arglist}", '$1'"
+			arglist="${arglist}, '$1'"
 			shift; # shift past this argument to next one
 		done
 	fi
-	echo -e "vim $f -c\"source vimpro.vim\" -c\"call $v (${arglist})\"\n"
-	vim $f -c"source ${c10dir}/vimpro.vim" -c"call $v (${arglist})"
+	echo -e "vim $f -c\"source ${c10s}/vimpro.vim\" -c\"call $vfunc (${arglist})\"\n"
+	vim $f -c"source ${c10s}/vimpro.vim" -c"call $vfunc (${arglist})"
 }
 
 while [[ $# -gt 0 ]]; do
