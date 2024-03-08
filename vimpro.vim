@@ -12,7 +12,7 @@ function! ReplaceStringInThisFile (oldr, newr)
 endfunction
 
 function! ReplaceStringInAllFiles (dir, oldr, newr)
-	execute "arg ".a:dir."**/*.[ch] | argdo %s/".a:oldr."/".a:newr."/gce | update"
+	execute "arg ".a:dir."/**/*.[ch] | argdo %s/".a:oldr."/".a:newr."/gce | update"
 endfunction
 
 function! ConvertToSyslog (PrintFn, ConvType)
