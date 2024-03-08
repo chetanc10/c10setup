@@ -59,6 +59,9 @@ altscreen on
 # set screen session type as xterm
 term xterm
 
+# screen scrollback enabler
+termcapinfo xterm* ti@:te@
+
 # screen window names?
 # https://unix.stackexchange.com/questions/114505/gnu-screen-status-bar-how-to-make-it-display-shell-session-names
 hardstatus alwayslastline
