@@ -59,6 +59,7 @@ alias gitd='LESS=-eFRX git diff'
 alias gitb='LESS=-eFRX git branch'
 alias gitr='LESS=-eFRX git remote -v'
 alias gitl="LESS=-eFRX git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gitlh='gitl | head'
 alias gitlog='LESS=-eFRX git log'
 alias gitblame="${c10s}/gitblame.sh"
 ghpush ()
